@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutti Kiesi Ferienprogramm - Tagesanmeldung</title>
+    <link rel="icon" href="data:,">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+        }
+        .form-container {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="tel"],
+        input[type="date"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .current-date {
+            padding: 8px;
+            background-color: #eee;
+            border-radius: 4px;
+            margin-bottom: 15px;
+        }
+        .checkbox-group {
+            margin: 15px 0;
+        }
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .checkbox-label input {
+            margin-right: 10px;
+        }
+        .signature-container {
+            margin: 20px 0;
+        }
+        .submit-btn {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .required:after {
+            content: " *";
+            color: red;
+        }
+        .error {
+            color: red;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+        .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .admin-section {
+            margin-top: 40px;
+            padding: 20px;
+            background-color: #eef;
+            border-radius: 8px;
+        }
+        #exportControls {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="logo">
+        <h1>Tutti Kiesi Ferienprogramm</h1>
+    </div>
+
+    <div class="form-container">
+        <h2>Tagesanmeldung</h2>
+        <p>Bitte füllen Sie dieses Formular aus, um Ihr Kind für den Tag anzumelden.</p>
+
+        <form id="registrationForm">
+            <div class="form-group">
+                <label>Datum</label>
+                <div class="current-date" id="currentDate"></div>
+                <input type="hidden" id="date" name="date">
+            </div>
+
+            <div class="form-group">
+                <label for="lastName" class="required">Nachname</label>
+                <input type="text" id="lastName" name="lastName" required>
+                <div id="lastNameError" class="error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="firstName" class="required">Vorname</label>
+                <input type="text" id="firstName" name="firstName" required>
+                <div id="firstNameError" class="error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="street" class="required">Straße und Hausnummer</label>
+                <input type="text" id="street" name="street" required>
+                <div id="streetError" class="error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="city" class="required">Ort</label>
+                <input type="text" id="city" name="city" required>
+                <div id="cityError" class="error"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone" class="required">Telefonnummer</label>
+                <input type="tel" id="phone" name="phone" required>
+                <div id="phoneError" class="error"></div>
+            </div>
+
+            <div class="checkbox-group">
+                <div class="checkbox-label">
+                    <input type="checkbox" id="dayFee" name="dayFee" value="10">
+                    <label for="dayFee">Tagesgebühr von 10€</label>
+                </div>
+
+                <div class="checkbox-label">
+                    <input type="checkbox" id="lunch" name="lunch" value="6">
+                    <label for="lunch">Mittagessen von 6€</label>
+                </div>
+
+                <div class="checkbox-label">
+                    <input type="checkbox" id="aloneHome" name="aloneHome">
+                    <label for="aloneHome">Mein Kind darf alleine nach Hause gehen</label>
+                </div>
+
+                <div class="checkbox-label">
+                    <input type="checkbox" id="terms" name="terms" required>
+                    <label for="terms" class="required">Ich habe die Teilnahmebedingungen gelesen und bin einverstanden</label>
+                    <div id="termsError" class="error"></div>
+                </div>
+            </div>
+
+            <div class="signature-container">
+                <label for="signatureText" class="required">Unterschrift (Name eingeben)</label>
+                <input type="text" id="signatureText" name="signatureText" required placeholder="Vorname Nachname">
+                <div id="signatureError" class="error"></div>
+            </div>
+
+            <button type="submit" class="submit-btn">Anmeldung abschicken</button>
+        </form>
+    </div>
+
+    <div class="admin-section">
+        <h2>Admin-Bereich</h2>
+        <div class="form-group">
+            <label for="adminEmail">E-Mail:</label>
+            <input type="email" id="adminEmail" placeholder="admin@example.com">
+            <label for="adminPassword">Passwort:</label>
+            <input type="password" id="adminPassword">
+            <button id="loginBtn">Login</button>
+        </div>
+        <div id="exportControls">
+            <button id="exportExcelBtn">Als Excel exportieren</button>
+            <div id="exportStatus"></div>
+        </div>
+    </div>
+
+    <!-- Bibliotheken -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+
+    <script>
+        // Firebase-Konfiguration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBfb0SUjFe_qYl_zqZaZ6YXVpaQC8H07AY",
+            authDomain: "ferienprogramm-checkin.firebaseapp.com",
+            projectId: "ferienprogramm-checkin",
+            storageBucket: "ferienprogramm-checkin.appspot.com",
+            messagingSenderId: "291165323970",
+            appId: "1:291165323970:web:866273f83491fec528f15b",
+            measurementId: "G-ZNHMPCGKNF"
+        };
+
+        // Firebase initialisieren
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aktuelles Datum anzeigen
+            const today = new Date();
+            const formattedDate = today.toLocaleDateString('de-DE', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            document.getElementById('currentDate').textContent = formattedDate;
+            document.getElementById('date').value = today.toISOString().split('T')[0];
+            
+            // Formular absenden
+            const form = document.getElementById('registrationForm');
+            form.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                let isValid = true;
+                
+                // Validierung
+                const requiredFields = [
+                    {id: 'lastName', errorId: 'lastNameError'},
+                    {id: 'firstName', errorId: 'firstNameError'},
+                    {id: 'street', errorId: 'streetError'},
+                    {id: 'city', errorId: 'cityError'},
+                    {id: 'phone', errorId: 'phoneError'},
+                    {id: 'terms', errorId: 'termsError', isCheckbox: true},
+                    {id: 'signatureText', errorId: 'signatureError'}
+                ];
+
+                requiredFields.forEach(field => {
+                    const element = document.getElementById(field.id);
+                    const errorElement = document.getElementById(field.errorId);
+                    
+                    if (!errorElement) {
+                        console.error(`Fehler-Element mit ID ${field.errorId} nicht gefunden!`);
+                        return;
+                    }
+
+                    if ((field.isCheckbox && !element.checked) || (!field.isCheckbox && !element.value)) {
+                        errorElement.textContent = 'Dieses Feld ist erforderlich';
+                        isValid = false;
+                    } else {
+                        errorElement.textContent = '';
+                    }
+                });
+                
+                // Daten speichern
+                if (isValid) {
+                    try {
+                        const formData = {
+                            date: document.getElementById('date').value,
+                            lastName: document.getElementById('lastName').value,
+                            firstName: document.getElementById('firstName').value,
+                            street: document.getElementById('street').value,
+                            city: document.getElementById('city').value,
+                            phone: document.getElementById('phone').value,
+                            dayFee: document.getElementById('dayFee').checked,
+                            lunch: document.getElementById('lunch').checked,
+                            aloneHome: document.getElementById('aloneHome').checked,
+                            signature: document.getElementById('signatureText').value,
+                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+                        };
+                        
+                        await db.collection('registrations').add(formData);
+                        alert('Anmeldung erfolgreich gespeichert!');
+                        form.reset();
+                    } catch (error) {
+                        console.error('Fehler:', error);
+                        alert('Fehler beim Speichern: ' + error.message);
+                    }
+                }
+            });
+            
+            // Admin-Login
+            document.getElementById('loginBtn').addEventListener('click', async function() {
+                const email = document.getElementById('adminEmail').value || "admin@example.com";
+                const password = document.getElementById('adminPassword').value || "geheim";
+                
+                try {
+                    await auth.signInWithEmailAndPassword(email, password);
+                    document.getElementById('exportControls').style.display = 'block';
+                    document.getElementById('exportStatus').textContent = 'Erfolgreich eingeloggt';
+                } catch (error) {
+                    console.error('Login-Fehler:', error);
+                    document.getElementById('exportStatus').textContent = 'Login fehlgeschlagen: ' + error.message;
+                }
+            });
+            
+            // Excel-Export
+            document.getElementById('exportExcelBtn').addEventListener('click', async function() {
+                try {
+                    document.getElementById('exportStatus').textContent = 'Daten werden exportiert...';
+                    
+                    const snapshot = await db.collection('registrations').get();
+                    const data = snapshot.docs.map(doc => {
+                        const docData = doc.data();
+                        return {
+                            'Name': docData.lastName,
+                            'Vorname': docData.firstName,
+                            'Straße': docData.street,
+                            'Ort': docData.city || '',
+                            'Tel.': docData.phone,
+                            'Bezahlt': 'Ja',
+                            'Tagesgebühr': docData.dayFee ? 'Ja' : 'Nein',
+                            'Mittagessen': docData.lunch ? 'Ja' : 'Nein',
+						    'Darf alleine nach Hause': docData.aloneHome ? 'Ja' : 'Nein', // Geänderte Überschrift
+                            'Unterschrift': docData.signature || 'N/A',
+                            'Datum': docData.date,
+                            'Eingetragen am': docData.timestamp?.toDate().toLocaleString('de-DE') || 'N/A'
+                        };
+                    });
+                    
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.json_to_sheet(data);
+                    XLSX.utils.book_append_sheet(wb, ws, "Anmeldungen");
+                    
+                    const dateStr = new Date().toISOString().split('T')[0];
+                    XLSX.writeFile(wb, `Tutti_Kiesi_Anmeldungen_${dateStr}.xlsx`);
+                    
+                    document.getElementById('exportStatus').textContent = 'Export erfolgreich!';
+                } catch (error) {
+                    console.error('Export-Fehler:', error);
+                    document.getElementById('exportStatus').textContent = 'Fehler beim Export: ' + error.message;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
