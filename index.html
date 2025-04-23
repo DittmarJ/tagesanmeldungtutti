@@ -54,6 +54,7 @@
             display: flex;
             align-items: center;
             margin-bottom: 8px;
+            cursor: pointer;
         }
         .checkbox-label input {
             margin-right: 10px;
@@ -94,10 +95,67 @@
         }
         #exportControls {
             display: none;
+            margin-top: 20px;
+        }
+        .admin-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .admin-btn.export {
+            background-color: #2ecc71;
+        }
+        .terms-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .terms-content {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .close-terms {
+            float: right;
+            cursor: pointer;
+            font-size: 1.5em;
+        }
+        #termsText {
+            white-space: pre-line;
+            margin-top: 20px;
+        }
+        .terms-link {
+            color: #3498db;
+            text-decoration: underline;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
+    <!-- Modal für Teilnahmebedingungen -->
+    <div id="termsModal" class="terms-modal">
+        <div class="terms-content">
+            <span class="close-terms">&times;</span>
+            <h2>Teilnahmebedingungen</h2>
+            <div id="termsText"></div>
+        </div>
+    </div>
+
     <div class="logo">
         <h1>Tutti Kiesi Ferienprogramm</h1>
     </div>
@@ -161,7 +219,7 @@
 
                 <div class="checkbox-label">
                     <input type="checkbox" id="terms" name="terms" required>
-                    <label for="terms" class="required">Ich habe die Teilnahmebedingungen gelesen und bin einverstanden</label>
+                    <label for="terms" class="required">Ich habe die <span class="terms-link">Teilnahmebedingungen</span> gelesen und bin einverstanden</label>
                     <div id="termsError" class="error"></div>
                 </div>
             </div>
@@ -186,7 +244,8 @@
             <button id="loginBtn">Login</button>
         </div>
         <div id="exportControls">
-            <button id="exportExcelBtn">Als Excel exportieren</button>
+            <button id="exportExcelBtn" class="admin-btn export">Als Excel exportieren</button>
+            <button id="resetDataBtn" class="admin-btn">Daten zurücksetzen (für neuen Tag)</button>
             <div id="exportStatus"></div>
         </div>
     </div>
@@ -216,6 +275,36 @@
         const db = firebase.firestore();
         const auth = firebase.auth();
 
+        // Teilnahmebedingungen Text
+        const termsText = `Teilnahmebedingungen der offenen Ferienbetreuung 
+im Spiel- und Kulturhaus Tutti Kiesi
+
+Allgemeines:
+1. Das Betreuungsangebot ist für Kinder ab 6 Jahren
+2. Die Betreuungszeiten sind von 8.00 bis 16.00 Uhr
+
+An-Abmeldung:
+1. Die Anmeldung zur Tagesbetreuung erfolgt täglich schriftlich
+2. Die Abmeldung erfolgt sowohl mündlich beim Betreuungspersonal als auch schriftlich an der Abmeldestation
+
+Abholung:
+Die Abholzeit ist über den gesamten Betreuungszeitraum möglich
+
+Aufsicht:
+Die Aufsichtspflicht beginnt, sobald das Kind nach Beginn der Öffnungszeiten an der Anmeldung registriert ist und endet mit dem Verlassen des Betreuungsangebotes, spätestens jedoch nach Betreuungsende. Beim Verlassen des Betreuungsangebotes erfolgt die Abmeldung des Kindes sowohl mündlich beim Betreuungspersonal als auch schriftlich an der Abmeldestation. Bitte stellen Sie sicher, dass die Abholsituation geklärt und Ihrem Kind bekannt ist.
+
+Meldepflicht:
+Allergien und Unverträglichkeiten, die im Betreuungsalltag relevant sind, müssen dem Betreuungspersonal vor Betreuungsantritt mitgeteilt werden. Ebenso verhält es sich beim besonderen Betreuungs-bzw. Förderbedarf des Kindes.
+
+Anspruch auf Betreuungsplatz:
+Sind alle Betreuungsplätze belegt, besteht kein Anspruch auf eine Tagesplatz
+
+Haftung:
+Die Haftung des Veranstalters, gleich aus welchem Rechtsgrund, ist auf Fahrlässigkeit oder Vorsatz beschränkt. Für Unfälle während der Veranstaltung, auf dem Weg zur und von der Veranstaltungsstätte sowie für Diebstahl und den Verlust oder Beschädigungen der Gegenstände übernimmt der Veranstalter keine Haftung.
+
+Ausschluss vom Ferienprogramm:
+Kinder, die trotz wiederholter Ermahnung durch auffälliges Verhalten den Gesamtbetrieb stören, sich oder andere Kinder gefährden, unerlaubt das Angebot verlassen oder sonstige schwerwiegende Gründe im Verhalten bestehen, können vom Betreuungsangebot ausgeschlossen werden.`;
+
         document.addEventListener('DOMContentLoaded', function() {
             // Aktuelles Datum anzeigen
             const today = new Date();
@@ -228,6 +317,31 @@
             document.getElementById('currentDate').textContent = formattedDate;
             document.getElementById('date').value = today.toISOString().split('T')[0];
             
+            // Teilnahmebedingungen Modal
+            const termsModal = document.getElementById('termsModal');
+            const termsTextElement = document.getElementById('termsText');
+            const termsLinks = document.querySelectorAll('.terms-link');
+            const closeTerms = document.getElementsByClassName('close-terms')[0];
+
+            termsTextElement.textContent = termsText;
+            
+            termsLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    termsModal.style.display = 'flex';
+                });
+            });
+
+            closeTerms.addEventListener('click', function() {
+                termsModal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target == termsModal) {
+                    termsModal.style.display = 'none';
+                }
+            });
+
             // Formular absenden
             const form = document.getElementById('registrationForm');
             form.addEventListener('submit', async function(e) {
@@ -321,7 +435,7 @@
                             'Bezahlt': 'Ja',
                             'Tagesgebühr': docData.dayFee ? 'Ja' : 'Nein',
                             'Mittagessen': docData.lunch ? 'Ja' : 'Nein',
-						    'Darf alleine nach Hause': docData.aloneHome ? 'Ja' : 'Nein', // Geänderte Überschrift
+                            'Darf alleine nach Hause': docData.aloneHome ? 'Ja' : 'Nein',
                             'Unterschrift': docData.signature || 'N/A',
                             'Datum': docData.date,
                             'Eingetragen am': docData.timestamp?.toDate().toLocaleString('de-DE') || 'N/A'
@@ -339,6 +453,26 @@
                 } catch (error) {
                     console.error('Export-Fehler:', error);
                     document.getElementById('exportStatus').textContent = 'Fehler beim Export: ' + error.message;
+                }
+            });
+
+            // Daten zurücksetzen
+            document.getElementById('resetDataBtn').addEventListener('click', async function() {
+                if (confirm('WARNUNG: Alle Anmeldungen werden dauerhaft gelöscht. Fortfahren?')) {
+                    try {
+                        const snapshot = await db.collection('registrations').get();
+                        const batch = db.batch();
+                        snapshot.docs.forEach(doc => {
+                            batch.delete(doc.ref);
+                        });
+                        await batch.commit();
+                        alert('Alle Daten wurden erfolgreich gelöscht!');
+                        document.getElementById('exportStatus').textContent = 'Daten zurückgesetzt am: ' + new Date().toLocaleString('de-DE');
+                    } catch (error) {
+                        console.error('Lösch-Fehler:', error);
+                        alert('Fehler beim Löschen: ' + error.message);
+                        document.getElementById('exportStatus').textContent = 'Fehler beim Zurücksetzen';
+                    }
                 }
             });
         });
