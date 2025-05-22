@@ -457,22 +457,28 @@ Kinder, die trotz wiederholter Ermahnung durch auffälliges Verhalten den Gesamt
             });
 
             // Daten zurücksetzen
-            document.getElementById('resetDataBtn').addEventListener('click', async function() {
-                if (confirm('WARNUNG: Alle Anmeldungen werden dauerhaft gelöscht. Fortfahren?')) {
-                    try {
-                        const snapshot = await db.collection('registrations').get();
-                        const batch = db.batch();
-                        snapshot.docs.forEach(doc => {
-                            batch.delete(doc.ref);
-                        });
-                        await batch.commit();
-                        alert('Alle Daten wurden erfolgreich gelöscht!');
-                        document.getElementById('exportStatus').textContent = 'Daten zurückgesetzt am: ' + new Date().toLocaleString('de-DE');
-                    } catch (error) {
-                        console.error('Lösch-Fehler:', error);
-                        alert('Fehler beim Löschen: ' + error.message);
-                        document.getElementById('exportStatus').textContent = 'Fehler beim Zurücksetzen';
-                    }
+// Daten zurücksetzen (NEUER CODE)
+document.getElementById('resetDataBtn').addEventListener('click', async function() {
+  if (!confirm('WARNUNG: Alle Anmeldungen werden unwiderruflich gelöscht. Fortfahren?')) return;
+
+  const statusElement = document.getElementById('exportStatus');
+  statusElement.textContent = "Lösche Daten...";
+  statusElement.style.color = "black";
+
+  try {
+    const snapshot = await db.collection('registrations').get();
+    for (const doc of snapshot.docs) {
+      await doc.ref.delete();
+    }
+
+    statusElement.textContent = `✅ ${snapshot.size} Anmeldungen gelöscht (${new Date().toLocaleTimeString()})`;
+    statusElement.style.color = "green";
+  } catch (error) {
+    console.error("Löschfehler:", error);
+    statusElement.textContent = `❌ Fehler: ${error.message}`;
+    statusElement.style.color = "red";
+  }
+});
                 }
             });
         });
