@@ -1963,43 +1963,43 @@ if (p.status === 'signedIn') {
                 
                 alarmParticipantList.innerHTML = '';
                 
-                filteredParticipants.forEach(p => {
+filteredParticipants.forEach(p => {
                     const item = document.createElement('li');
                     item.className = `participant-item-container ${p.present ? 'present' : ''}`;
                     const actionText = p.present ? 'Abwesend markieren' : 'Anwesend markieren';
                     const btnClass = 'anwesend-button';
                     const dotClass = p.present ? 'status-dot-blue' : 'status-dot-red';
-                    const aloneText = p.canGoHomeAlone ? 'Ja' : 'Nein';
                     
-const aloneText = p.canGoHomeAlone ? 'Ja' : 'Nein';
-const nameColor = (controlModeActive && !p.paid) ? 'text-[#ff3b30]' : '';
-const commentBadge = (p.comments?.length > 0) ? '<span class="comment-icon" title="Kommentare vorhanden">C</span>' : '';
-const authBadge = (p.allowedPickupPersons) ? '<span class="auth-icon" title="Abholberechtigung vorhanden">✍️</span>' : '';
+                    const aloneText = p.canGoHomeAlone ? 'Ja' : 'Nein';
+                    const nameColor = (controlModeActive && !p.paid) ? 'text-[#ff3b30]' : '';
+                    const commentBadge = (p.comments?.length > 0) ? '<span class="comment-icon" title="Kommentare vorhanden">C</span>' : '';
+                    const authBadge = (p.allowedPickupPersons) ? '<span class="auth-icon" title="Abholberechtigung vorhanden">✍️</span>' : '';
 
-item.innerHTML = `
-    <div class="participant-action-button-container">
-        <button class="participant-action-button ${btnClass}" data-action="${actionText.toLowerCase()}" data-id="${p.id}">${actionText}</button>
-    </div>
-    <div class="participant-content-wrapper">
-        <div class="participant-left">
-            <span class="status-dot ${dotClass}"></span>
-            <span class="participant-name ${nameColor}">${p.name}</span>
-        </div>
-        <div class="participant-right">
-            ${commentBadge}
-            ${authBadge}
-            <span class="info-icon" data-id="${p.id}">i</span>
-        </div>
-    </div>
-`;                    alarmParticipantList.appendChild(item);
+                    item.innerHTML = `
+                        <div class="participant-action-button-container">
+                            <button class="participant-action-button ${btnClass}" data-action="${actionText.toLowerCase()}" data-id="${p.id}">${actionText}</button>
+                        </div>
+                        <div class="participant-content-wrapper">
+                            <div class="participant-left">
+                                <span class="status-dot ${dotClass}"></span>
+                                <span class="participant-name ${nameColor}">${p.name}</span>
+                            </div>
+                            <div class="participant-right">
+                                ${commentBadge}
+                                ${authBadge}
+                                <span class="info-icon" data-id="${p.id}">i</span>
+                            </div>
+                        </div>
+                    `;
+                    
+                    alarmParticipantList.appendChild(item);
                     
                     const wrapper = item.querySelector('.participant-content-wrapper');
                     wrapper.addEventListener('pointerdown', handlePointerDown);
                     wrapper.addEventListener('pointermove', handlePointerMove);
                     wrapper.addEventListener('pointerup', handlePointerUp);
                     wrapper.addEventListener('pointercancel', handlePointerCancel);
-                });
-                
+                });                
                 updateAlarmStats();
             }
             
