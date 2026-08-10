@@ -581,6 +581,8 @@
             cursor: crosshair;
         }
     </style>
+    <!-- jsPDF AutoTable Plugin für Tabellen im Querformat -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </head>
 <body>
     <div id="app-container" class="glass-card w-full max-w-4xl mx-auto p-5 transition-all duration-300">
@@ -853,7 +855,8 @@
                 <div id="program-settings-section" class="glass-panel p-4 hidden">
                     <h3 class="text-lg font-semibold text-[#1d1d1f] mb-4">Programmeinstellungen</h3>
                     <div class="space-y-2 mb-4">
-                        <button id="daily-end-report-button" class="glass-button-success w-full py-2 rounded-button font-bold">📋 Tagesende-Bericht drucken (PDF)</button>
+                        <button id="daily-end-report-button" class="glass-button-success w-full py-2 rounded-button font-bold">📋 Tagesende-Bericht drucken (Querformat-Tabelle)</button>
+                        <button id="print-all-auth-button" class="glass-button-primary w-full py-2 rounded-button font-bold">✍️ Alle Vollmächte drucken (PDF)</button>
                     </div>
                     <label class="flex items-center space-x-2 mb-4 border-t pt-4">
                         <input type="checkbox" id="control-mode-toggle" class="h-4 w-4 rounded">
@@ -1325,6 +1328,7 @@
 
             const controlModeToggle = document.getElementById('control-mode-toggle');
             const dailyEndReportButton = document.getElementById('daily-end-report-button');
+            const printAllAuthButton = document.getElementById('print-all-auth-button');
             const createBackupButton = document.getElementById('create-backup-button');
             const loadBackupButton = document.getElementById('load-backup-button');
             const loadBackupInput = document.getElementById('load-backup-input');
@@ -1517,82 +1521,153 @@
                 });
             });
 
-            // TAGESENDE BERICHT PDF GENERIERUNG
+            // TAGESENDE BERICHT ALS QUERFORMAT-TABELLE (AUTO-TABLE)
             function printDailyEndReportPDF() {
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF();
+                const doc = new jsPDF('landscape'); // Querformat
                 const today = new Date().toLocaleDateString('de-DE');
 
                 doc.setFontSize(16);
                 doc.setFont("helvetica", "bold");
-                doc.text("Tagesende-Bericht / Anwesenheits- & Aktivitätsprotokoll", 105, 15, { align: "center" });
+                doc.text("Tagesende-Bericht / Anwesenheits- & Aktivitätsprotokoll", 14, 15);
 
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
-                doc.text(`Datum: ${today}`, 105, 22, { align: "center" });
+                doc.text(`Datum: ${today}`, 14, 22);
 
-                let y = 32;
-                doc.setLineWidth(0.3);
-                doc.line(14, 26, 196, 26);
+                const tableRows = participants.map((p, index) => {
+                    let statusText = p.status === 'signedIn' ? 'Angemeldet' : 'Abgemeldet / Frei';
+                    if (p.pickedUpBy) statusText += ` (Abgeholt von: ${p.pickedUpBy})`;
 
-                if (participants.length === 0) {
-                    doc.text("Keine Teilnehmer vorhanden.", 14, y);
-                } else {
-                    participants.forEach((p, index) => {
-                        if (y > 270) {
-                            doc.addPage();
-                            y = 20;
-                        }
+                    let activitiesText = '';
+                    if (p.activityHistory && p.activityHistory.length > 0) {
+                        activitiesText = p.activityHistory.map(h => `${h.type} um ${h.time}${h.by ? ` (${h.by})` : ''}`).join('\n');
+                    } else {
+                        activitiesText = 'Keine';
+                    }
 
-                        doc.setFont("helvetica", "bold");
-                        doc.setFontSize(11);
-                        doc.text(`${index + 1}. ${p.name} (${p.registrationType})`, 14, y);
-                        y += 6;
+                    let commentsText = '';
+                    if (p.comments && p.comments.length > 0) {
+                        commentsText = p.comments.map(c => `[${c.timestamp}] ${c.by}: ${c.text}`).join('\n');
+                    } else {
+                        commentsText = 'Keine';
+                    }
 
-                        doc.setFont("helvetica", "normal");
-                        doc.setFontSize(9);
-                        
-                        // Letzter Status & Abholung
-                        let statusText = p.status === 'signedIn' ? 'Status: Angemeldet' : 'Status: Abgemeldet / Nicht anwesend';
-                        if (p.pickedUpBy) statusText += ` (Abgeholt von: ${p.pickedUpBy})`;
-                        doc.text(statusText, 18, y);
-                        y += 5;
+                    let authText = p.allowedPickupPersons || 'Keine';
 
-                        // Vollmachten
-                        if (p.allowedPickupPersons) {
-                            doc.text(`Bevollmächtigung: ${p.allowedPickupPersons}`, 18, y);
-                            y += 5;
-                        }
+                    return [
+                        index + 1,
+                        p.name,
+                        p.registrationType,
+                        statusText,
+                        authText,
+                        activitiesText,
+                        commentsText
+                    ];
+                });
 
-                        // Aktivitäten
-                        if (p.activityHistory && p.activityHistory.length > 0) {
-                            doc.text("Aktivitäten:", 18, y);
-                            y += 4;
-                            p.activityHistory.forEach(h => {
-                                doc.text(`• ${h.type} um ${h.time}${h.by ? ` von ${h.by}` : ''}${h.pickup ? ` [Abholung: ${h.pickup}]` : ''}`, 22, y);
-                                y += 4;
-                            });
-                        } else {
-                            doc.text("Aktivitäten: Keine An- oder Abmeldungen heute", 18, y);
-                            y += 4;
-                        }
+                doc.autoTable({
+                    startY: 28,
+                    head: [['Nr.', 'Teilnehmer', 'Art', 'Status / Abholung', 'Bevollmächtigung', 'Aktivitäten', 'Kommentare']],
+                    body: tableRows,
+                    theme: 'grid',
+                    styles: { fontSize: 8, cellPadding: 3, overflow: 'linebreak' },
+                    headStyles: { fillColor: [0, 122, 255] },
+                    columnStyles: {
+                        0: { cellWidth: 10 },
+                        1: { cellWidth: 35 },
+                        2: { cellWidth: 25 },
+                        3: { cellWidth: 40 },
+                        4: { cellWidth: 40 },
+                        5: { cellWidth: 45 },
+                        6: { cellWidth: 80 }
+                    }
+                });
 
-                        // Kommentare
-                        if (p.comments && p.comments.length > 0) {
-                            doc.text("Kommentare:", 18, y);
-                            y += 4;
-                            p.comments.forEach(c => {
-                                doc.text(`• [${c.timestamp}] ${c.by}: ${c.text}`, 22, y);
-                                y += 4;
-                            });
-                        }
+                const pdfBlobUrl = doc.output('bloburl');
+                window.open(pdfBlobUrl, '_blank');
+            }
 
-                        y += 4;
-                        doc.setDrawColor(200, 200, 200);
-                        doc.line(14, y - 2, 196, y - 2);
-                        y += 3;
-                    });
+            // ALLE VOLLMÄCHTE ALS PDF DRUCKEN
+            function printAllAuthorizationsPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const today = new Date().toLocaleDateString('de-DE');
+
+                const validParticipants = participants.filter(p => p.allowedPickupPersons && p.signatureImage);
+
+                if (validParticipants.length === 0) {
+                    showActionFeedback("Keine gültigen Vollmachten mit Unterschrift gefunden", false);
+                    return;
                 }
+
+                validParticipants.forEach((p, idx) => {
+                    if (idx > 0) doc.addPage();
+
+                    doc.setFontSize(18);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("VOLLMACHT ZUR ABHOLUNG EINES KINDES", 105, 20, { align: "center" });
+
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "normal");
+                    doc.text("(Tagesgültige Abholberechtigung)", 105, 27, { align: "center" });
+
+                    doc.setLineWidth(0.5);
+                    doc.line(20, 32, 190, 32);
+
+                    doc.setFontSize(12);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("1. Angaben zum Kind", 20, 42);
+                    
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`Vollständiger Name: ${p.name || '---'}`, 25, 50);
+                    doc.text(`Geburtsdatum: ${p.dob || 'Nicht hinterlegt'}`, 25, 57);
+
+                    doc.setFontSize(12);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("2. Erziehungsberechtigte(r) (Vollmachtgeber)", 20, 70);
+
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`Vollständiger Name: ${p.parentName || '---'}`, 25, 78);
+                    doc.text(`Anschrift (vom Kind): ${p.street || '---'}, ${p.city || '---'}`, 25, 85);
+                    doc.text(`Telefonnummer (vom Kind): ${p.phone || '---'}`, 25, 92);
+
+                    doc.setFontSize(12);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("3. Bevollmächtigte Person (Abholperson)", 20, 105);
+
+                    doc.setFontSize(10);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`Vollständiger Name: ${p.allowedPickupPersonName || p.allowedPickupPersons || '---'}`, 25, 113);
+                    doc.text(`Beziehung zum Kind: ${p.allowedPickupRelation || 'Keine Angabe'}`, 25, 120);
+
+                    doc.setFontSize(12);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("4. Gültigkeit & Rechtliche Hinweise", 20, 133);
+
+                    doc.setFontSize(9);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`• Die Vollmacht gilt AUSSCHLIESSLICH für den heutigen Tag (${today}).`, 25, 141);
+                    doc.text(`• Die abholende Person muss MINDESTENS 14 JAHRE alt sein.`, 25, 147);
+                    doc.text(`• Die abholende Person muss sich auf Verlangen durch einen Lichtbildausweis ausweisen.`, 25, 153);
+
+                    doc.setLineWidth(0.3);
+                    doc.line(20, 165, 190, 165);
+
+                    doc.setFontSize(11);
+                    doc.setFont("helvetica", "bold");
+                    doc.text("Eigenhändige Unterschrift der/des Erziehungsberechtigten:", 20, 175);
+
+                    if (p.signatureImage) {
+                        doc.addImage(p.signatureImage, 'PNG', 20, 180, 80, 35);
+                    }
+
+                    doc.setFontSize(9);
+                    doc.setFont("helvetica", "normal");
+                    doc.text(`Ausgestellt und digital erfasst am: ${today}`, 20, 222);
+                });
 
                 const pdfBlobUrl = doc.output('bloburl');
                 window.open(pdfBlobUrl, '_blank');
@@ -3134,6 +3209,10 @@
 
             dailyEndReportButton?.addEventListener('click', () => {
                 printDailyEndReportPDF();
+            });
+
+            printAllAuthButton?.addEventListener('click', () => {
+                printAllAuthorizationsPDF();
             });
 
             importParticipantsButton?.addEventListener('click', () => {
