@@ -1054,8 +1054,8 @@
             </div>
         </div>
 
-        <!-- ABHOL-MODAL (ABMELDUNG) -->
-        <div id="pickup-modal" class="fixed inset-0 modal-glass flex items-start justify-center hidden z-50 pt-[12px]">
+        <!-- ABHOL-MODAL (ABMELDUNG) - Fixiert am oberen Rand -->
+        <div id="pickup-modal" class="fixed inset-0 modal-glass flex items-start justify-center hidden z-50 pt-4">
             <div class="modal-content p-5 w-full max-w-sm mx-4">
                 <h3 class="text-xl font-bold text-[#1d1d1f] mb-3">Teilnehmer abholen</h3>
                 <p class="mb-3 text-[#6c6c70]">Wer holt <span id="pickup-participant-name" class="font-semibold text-[#1d1d1f]"></span> ab?</p>
@@ -1853,7 +1853,7 @@
 
             function resetSearchAndFilter() {
                 if (participantSearchInput) participantSearchInput.value = '';
-                if (sortSelect) sortSelect.value = 'firstNameAsc';
+                // HINWEIS: Sortierung wird hier BEIBEHALTEN, nicht mehr zurückgesetzt!
                 renderParticipantList();
             }
             
@@ -3003,7 +3003,7 @@
                             p.activityHistory.push({ type: 'Angemeldet', time: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'Unbekannt' });
                             showActionFeedback(`${p.name} angemeldet`, true);
                             saveParticipants();
-                            resetSearchAndFilter();
+                            renderParticipantList(); // Ersetzt resetSearchAndFilter, damit Sortierung beibehalten wird
                         } else if (action === 'abmelden' && p.status === 'signedIn') {
                             currentParticipantBeingPickedUp = p;
                             pickupParticipantName.textContent = p.name;
@@ -3188,7 +3188,7 @@
                         participants[idx].activityHistory.push({ type: 'Abgemeldet', time: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'Unbekannt', pickup: person });
                         showActionFeedback(`${currentParticipantBeingPickedUp.name} von ${person} abgeholt`, false);
                         saveParticipants();
-                        resetSearchAndFilter();
+                        renderParticipantList(); // Ersetzt resetSearchAndFilter, damit Sortierung beibehalten wird
                     }
                 }
                 pickupModal.classList.add('hidden');
