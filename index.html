@@ -1521,7 +1521,7 @@
                 });
             });
 
-            // TAGESENDE BERICHT ALS QUERFORMAT-TABELLE (AUTO-TABLE)
+            // TAGESENDE BERICHT ALS QUERFORMAT-TABELLE (AUTO-TABLE) MIT OPTIMIERTEN SPALTEN & KOMMENTAR-VERMERK
             function printDailyEndReportPDF() {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('landscape'); // Querformat
@@ -1546,21 +1546,22 @@
                         activitiesText = 'Keine';
                     }
 
-                    let commentsText = '';
-                    if (p.comments && p.comments.length > 0) {
-                        commentsText = p.comments.map(c => `[${c.timestamp}] ${c.by}: ${c.text}`).join('\n');
-                    } else {
-                        commentsText = 'Keine';
+                    // Bevollmächtigung und Kommentare zusammen in der Kommentarspalte zusammenfassen (leer lassen wenn nichts da ist)
+                    let commentsParts = [];
+                    if (p.allowedPickupPersons) {
+                        commentsParts.push(`Bevollmächtigung: ${p.allowedPickupPersons}`);
                     }
-
-                    let authText = p.allowedPickupPersons || 'Keine';
+                    if (p.comments && p.comments.length > 0) {
+                        const userComments = p.comments.map(c => `[${c.timestamp}] ${c.by}: ${c.text}`).join('\n');
+                        commentsParts.push(userComments);
+                    }
+                    let commentsText = commentsParts.length > 0 ? commentsParts.join('\n\n') : '';
 
                     return [
                         index + 1,
                         p.name,
                         p.registrationType,
                         statusText,
-                        authText,
                         activitiesText,
                         commentsText
                     ];
@@ -1568,19 +1569,18 @@
 
                 doc.autoTable({
                     startY: 28,
-                    head: [['Nr.', 'Teilnehmer', 'Art', 'Status / Abholung', 'Bevollmächtigung', 'Aktivitäten', 'Kommentare']],
+                    head: [['Nr.', 'Teilnehmer', 'Art', 'Status / Abholung', 'Aktivitäten', 'Kommentare / Vollmacht']],
                     body: tableRows,
                     theme: 'grid',
-                    styles: { fontSize: 8, cellPadding: 3, overflow: 'linebreak' },
+                    styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' }, // Etwas kleiner für mehr Kompaktheit
                     headStyles: { fillColor: [0, 122, 255] },
                     columnStyles: {
-                        0: { cellWidth: 10 },
-                        1: { cellWidth: 35 },
-                        2: { cellWidth: 25 },
-                        3: { cellWidth: 40 },
-                        4: { cellWidth: 40 },
-                        5: { cellWidth: 45 },
-                        6: { cellWidth: 80 }
+                        0: { cellWidth: 10 },  // Nr.
+                        1: { cellWidth: 30 },  // Teilnehmer (schmaler)
+                        2: { cellWidth: 35 },  // Art (etwas breiter)
+                        3: { cellWidth: 45 },  // Status / Abholung
+                        4: { cellWidth: 75 },  // Aktivitäten (breiter)
+                        5: { cellWidth: 80 }   // Kommentare / Vollmacht (deutlich enger als vorher)
                     }
                 });
 
@@ -1853,7 +1853,6 @@
 
             function resetSearchAndFilter() {
                 if (participantSearchInput) participantSearchInput.value = '';
-                // HINWEIS: Sortierung wird hier BEIBEHALTEN, nicht mehr zurückgesetzt!
                 renderParticipantList();
             }
             
@@ -3003,7 +3002,7 @@
                             p.activityHistory.push({ type: 'Angemeldet', time: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'Unbekannt' });
                             showActionFeedback(`${p.name} angemeldet`, true);
                             saveParticipants();
-                            renderParticipantList(); // Ersetzt resetSearchAndFilter, damit Sortierung beibehalten wird
+                            renderParticipantList();
                         } else if (action === 'abmelden' && p.status === 'signedIn') {
                             currentParticipantBeingPickedUp = p;
                             pickupParticipantName.textContent = p.name;
@@ -3188,7 +3187,7 @@
                         participants[idx].activityHistory.push({ type: 'Abgemeldet', time: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'Unbekannt', pickup: person });
                         showActionFeedback(`${currentParticipantBeingPickedUp.name} von ${person} abgeholt`, false);
                         saveParticipants();
-                        renderParticipantList(); // Ersetzt resetSearchAndFilter, damit Sortierung beibehalten wird
+                        renderParticipantList();
                     }
                 }
                 pickupModal.classList.add('hidden');
