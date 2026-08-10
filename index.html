@@ -1539,7 +1539,14 @@
                 doc.text(`Datum: ${today}`, 14, 26);
 
                 const tableRows = participants.map((p, index) => {
-                    let statusText = p.status === 'signedIn' ? 'Angemeldet' : 'Abgemeldet / Frei';
+                    let statusText = '';
+if (p.status === 'signedIn') {
+    statusText = 'Angemeldet';
+} else if (p.activityHistory && p.activityHistory.length > 0) {
+    statusText = 'Abgemeldet / Frei';
+} else {
+    statusText = 'Nicht erschienen';
+}
                     if (p.pickedUpBy) statusText += ` (Abgeholt von: ${p.pickedUpBy})`;
 
                     let activitiesText = '';
@@ -1964,24 +1971,27 @@
                     const dotClass = p.present ? 'status-dot-blue' : 'status-dot-red';
                     const aloneText = p.canGoHomeAlone ? 'Ja' : 'Nein';
                     
-                    item.innerHTML = `
-                        <div class="participant-action-button-container">
-                            <button class="participant-action-button ${btnClass}" data-action="toggle-present" data-id="${p.id}">
-                                ${actionText}
-                            </button>
-                        </div>
-                        <div class="participant-content-wrapper">
-                            <div class="participant-left">
-                                <span class="status-dot ${dotClass}"></span>
-                                <span class="participant-name">${p.name}</span>
-                            </div>
-                            <div class="participant-right">
-                                <span class="participant-meta">${p.registrationType} | Alleine: ${aloneText}</span>
-                                <span class="info-icon" data-id="${p.id}">i</span>
-                            </div>
-                        </div>
-                    `;
-                    alarmParticipantList.appendChild(item);
+const aloneText = p.canGoHomeAlone ? 'Ja' : 'Nein';
+const nameColor = (controlModeActive && !p.paid) ? 'text-[#ff3b30]' : '';
+const commentBadge = (p.comments?.length > 0) ? '<span class="comment-icon" title="Kommentare vorhanden">C</span>' : '';
+const authBadge = (p.allowedPickupPersons) ? '<span class="auth-icon" title="Abholberechtigung vorhanden">✍️</span>' : '';
+
+item.innerHTML = `
+    <div class="participant-action-button-container">
+        <button class="participant-action-button ${btnClass}" data-action="${actionText.toLowerCase()}" data-id="${p.id}">${actionText}</button>
+    </div>
+    <div class="participant-content-wrapper">
+        <div class="participant-left">
+            <span class="status-dot ${dotClass}"></span>
+            <span class="participant-name ${nameColor}">${p.name}</span>
+        </div>
+        <div class="participant-right">
+            ${commentBadge}
+            ${authBadge}
+            <span class="info-icon" data-id="${p.id}">i</span>
+        </div>
+    </div>
+`;                    alarmParticipantList.appendChild(item);
                     
                     const wrapper = item.querySelector('.participant-content-wrapper');
                     wrapper.addEventListener('pointerdown', handlePointerDown);
@@ -2477,26 +2487,35 @@
 
                 const searchTerm = participantSearchInput?.value.toLowerCase() || '';
 
-                let filtered = [...participants].filter(p => {
-                    return p.name.toLowerCase().includes(searchTerm);
-                });
-                
-                filtered = sortParticipants(filtered);
+let filtered = [...participants].filter(p => {
+    return p.name.toLowerCase().includes(searchTerm);
+});
 
-                const signedCount = filtered.filter(p => p.status !== 'available').length;
-                const countSpan = document.getElementById('participant-count');
-                if (countSpan) countSpan.textContent = signedCount;
+filtered = sortParticipants(filtered);
 
-                let hasAny = false;
-                filtered.forEach(p => {
-                    const item = document.createElement('li');
-                    item.className = `participant-item-container ${p.status}`;
-                    const actionText = p.status === 'available' ? 'Anmelden' : 'Abmelden';
-                    const btnClass = p.status === 'available' ? 'anmelden-button' : 'abmelden-button';
-                    let dotClass = '';
-                    if (p.status === 'signedIn') dotClass = 'status-dot-green';
-                    else if (p.activityHistory.length === 0) dotClass = 'status-dot-gray';
-                    else dotClass = 'status-dot-red';
+const signedCount = filtered.filter(p => p.status !== 'available').length;
+const countSpan = document.getElementById('participant-count');
+if (countSpan) countSpan.textContent = signedCount;
+
+let hasAny = false;
+filtered.forEach(p => {
+    const item = document.createElement('li');
+    item.className = `participant-item-container ${p.status}`;
+    const actionText = p.status === 'available' ? 'Anmelden' : 'Abmelden';
+    const btnClass = p.status === 'available' ? 'anmelden-button' : 'abmelden-button';
+    
+    let dotClass = '';
+    let statusText = 'Nicht erschienen';
+    if (p.status === 'signedIn') {
+        dotClass = 'status-dot-green';
+        statusText = 'Angemeldet';
+    } else if (p.activityHistory && p.activityHistory.length > 0) {
+        dotClass = 'status-dot-red';
+        statusText = 'Abgemeldet';
+    } else {
+        dotClass = 'status-dot-gray';
+        statusText = 'Nicht erschienen';
+    }
                     const aloneText = p.canGoHomeAlone ? 'Ja' : 'Nein';
                     const nameColor = (controlModeActive && !p.paid) ? 'text-[#ff3b30]' : '';
                     const commentBadge = (p.comments?.length > 0) ? '<span class="comment-icon" title="Kommentare vorhanden">C</span>' : '';
@@ -2512,7 +2531,6 @@
                                 <span class="participant-name ${nameColor}">${p.name}</span>
                             </div>
                             <div class="participant-right">
-                                <span class="participant-meta">${p.registrationType} | Alleine: ${aloneText}</span>
                                 ${commentBadge}
                                 ${authBadge}
                                 <span class="info-icon" data-id="${p.id}">i</span>
@@ -2719,17 +2737,22 @@
                 resetInactivityTimer();
             }
 
-            function createBackup(manual = false) {
-                const data = JSON.stringify(participants);
-                if (manual) {
-                    const blob = new Blob([data], { type: 'application/json' });
-                    const a = document.createElement('a');
-                    a.href = URL.createObjectURL(blob);
-                    a.download = `backup_ferienprogramm_${Date.now()}.json`;
-                    a.click();
-                    showMessage("Sicherung erstellt", false);
-                }
-            }
+function createBackup(manual = false) {
+    const exportData = {
+        version: "2.0",
+        exportDate: new Date().toISOString(),
+        participants: participants
+    };
+    const data = JSON.stringify(exportData, null, 2);
+    if (manual) {
+        const blob = new Blob([data], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Sicherung_TuttiKiesi_${new Date().toISOString().slice(0,10)}.json`;
+        a.click();
+        showMessage("Vollständiges Backup (inkl. Vollmachten & Historie) erstellt", false);
+    }
+}
 
             let inactivityTimer;
             const INACTIVITY_LIMIT = 60 * 1000;
