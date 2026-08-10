@@ -10,7 +10,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <!-- SheetJS (xlsx.js) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
-    <!-- jsPDF für PDF-Generierung der Abholberechtigung -->
+    <!-- jsPDF für PDF-Generierung -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         * {
@@ -81,10 +81,6 @@
             background: rgba(255, 255, 255, 1);
             transform: translateY(-1px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .glass-button:active {
-            transform: translateY(0);
         }
         
         .glass-button-primary {
@@ -307,10 +303,6 @@
             box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
         }
         
-        .admin-nav-button.hidden-nav {
-            display: none !important;
-        }
-        
         #action-feedback-message {
             transform: translateY(-100%);
             opacity: 0;
@@ -412,7 +404,7 @@
         }
         
         .user-inactive {
-            opacity: 0.6;
+            opacity: 0.5;
             text-decoration: line-through;
         }
         
@@ -515,10 +507,6 @@
         .alarm-filter-btn.active {
             background: #007aff;
             color: white;
-        }
-        
-        .alarm-search-input {
-            margin-bottom: 1rem;
         }
         
         .circular-hold-container {
@@ -708,7 +696,7 @@
                     </div>
                 </div>
                 
-                <input type="text" id="alarm-search-input" placeholder="Teilnehmer suchen..." class="glass-input w-full p-2 rounded-button alarm-search-input">
+                <input type="text" id="alarm-search-input" placeholder="Teilnehmer suchen..." class="glass-input w-full p-2 rounded-button mb-3">
                 
                 <div class="alarm-filter-buttons">
                     <button data-filter="all" class="alarm-filter-btn active">Alle</button>
@@ -864,7 +852,10 @@
 
                 <div id="program-settings-section" class="glass-panel p-4 hidden">
                     <h3 class="text-lg font-semibold text-[#1d1d1f] mb-4">Programmeinstellungen</h3>
-                    <label class="flex items-center space-x-2 mb-4">
+                    <div class="space-y-2 mb-4">
+                        <button id="daily-end-report-button" class="glass-button-success w-full py-2 rounded-button font-bold">📋 Tagesende-Bericht drucken (PDF)</button>
+                    </div>
+                    <label class="flex items-center space-x-2 mb-4 border-t pt-4">
                         <input type="checkbox" id="control-mode-toggle" class="h-4 w-4 rounded">
                         <span class="text-sm text-[#1d1d1f]">Kontrollmodus aktivieren (unbezahlte Teilnehmer rot markieren)</span>
                     </label>
@@ -941,7 +932,7 @@
             </div>
         </div>
 
-        <!-- RECHTLICHE HINWEISE MODAL (So knapp wie möglich) -->
+        <!-- RECHTLICHE HINWEISE MODAL (erscheint beim Speichern der Unterschrift) -->
         <div id="legal-notice-modal" class="fixed inset-0 modal-glass flex items-center justify-center hidden z-50">
             <div class="modal-content p-5 w-full max-w-sm mx-4 text-center">
                 <h3 class="text-lg font-bold text-[#1d1d1f] mb-2">⚖️ Rechtliches</h3>
@@ -1060,7 +1051,7 @@
             </div>
         </div>
 
-        <!-- ABHOL-MODAL (ABMELDUNG) - Platziert sich ganz oben unter dem Kasten (~3mm) -->
+        <!-- ABHOL-MODAL (ABMELDUNG) -->
         <div id="pickup-modal" class="fixed inset-0 modal-glass flex items-start justify-center hidden z-50 pt-[12px]">
             <div class="modal-content p-5 w-full max-w-sm mx-4">
                 <h3 class="text-xl font-bold text-[#1d1d1f] mb-3">Teilnehmer abholen</h3>
@@ -1071,7 +1062,6 @@
                     <span id="allowed-pickup-notice-text"></span>
                 </div>
 
-                <!-- ERWÜNSCHTE ABHOLOPTIONEN -->
                 <select id="pickup-person-select" class="w-full p-2 mb-2 rounded-button">
                     <option value="">Bitte wählen</option>
                     <option value="Mutter">Mutter</option>
@@ -1334,6 +1324,7 @@
             const child3Div = document.getElementById('child3-container');
 
             const controlModeToggle = document.getElementById('control-mode-toggle');
+            const dailyEndReportButton = document.getElementById('daily-end-report-button');
             const createBackupButton = document.getElementById('create-backup-button');
             const loadBackupButton = document.getElementById('load-backup-button');
             const loadBackupInput = document.getElementById('load-backup-input');
@@ -1526,7 +1517,88 @@
                 });
             });
 
-            // DRUCKEN / PDF GENERIERUNG
+            // TAGESENDE BERICHT PDF GENERIERUNG
+            function printDailyEndReportPDF() {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                const today = new Date().toLocaleDateString('de-DE');
+
+                doc.setFontSize(16);
+                doc.setFont("helvetica", "bold");
+                doc.text("Tagesende-Bericht / Anwesenheits- & Aktivitätsprotokoll", 105, 15, { align: "center" });
+
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Datum: ${today}`, 105, 22, { align: "center" });
+
+                let y = 32;
+                doc.setLineWidth(0.3);
+                doc.line(14, 26, 196, 26);
+
+                if (participants.length === 0) {
+                    doc.text("Keine Teilnehmer vorhanden.", 14, y);
+                } else {
+                    participants.forEach((p, index) => {
+                        if (y > 270) {
+                            doc.addPage();
+                            y = 20;
+                        }
+
+                        doc.setFont("helvetica", "bold");
+                        doc.setFontSize(11);
+                        doc.text(`${index + 1}. ${p.name} (${p.registrationType})`, 14, y);
+                        y += 6;
+
+                        doc.setFont("helvetica", "normal");
+                        doc.setFontSize(9);
+                        
+                        // Letzter Status & Abholung
+                        let statusText = p.status === 'signedIn' ? 'Status: Angemeldet' : 'Status: Abgemeldet / Nicht anwesend';
+                        if (p.pickedUpBy) statusText += ` (Abgeholt von: ${p.pickedUpBy})`;
+                        doc.text(statusText, 18, y);
+                        y += 5;
+
+                        // Vollmachten
+                        if (p.allowedPickupPersons) {
+                            doc.text(`Bevollmächtigung: ${p.allowedPickupPersons}`, 18, y);
+                            y += 5;
+                        }
+
+                        // Aktivitäten
+                        if (p.activityHistory && p.activityHistory.length > 0) {
+                            doc.text("Aktivitäten:", 18, y);
+                            y += 4;
+                            p.activityHistory.forEach(h => {
+                                doc.text(`• ${h.type} um ${h.time}${h.by ? ` von ${h.by}` : ''}${h.pickup ? ` [Abholung: ${h.pickup}]` : ''}`, 22, y);
+                                y += 4;
+                            });
+                        } else {
+                            doc.text("Aktivitäten: Keine An- oder Abmeldungen heute", 18, y);
+                            y += 4;
+                        }
+
+                        // Kommentare
+                        if (p.comments && p.comments.length > 0) {
+                            doc.text("Kommentare:", 18, y);
+                            y += 4;
+                            p.comments.forEach(c => {
+                                doc.text(`• [${c.timestamp}] ${c.by}: ${c.text}`, 22, y);
+                                y += 4;
+                            });
+                        }
+
+                        y += 4;
+                        doc.setDrawColor(200, 200, 200);
+                        doc.line(14, y - 2, 196, y - 2);
+                        y += 3;
+                    });
+                }
+
+                const pdfBlobUrl = doc.output('bloburl');
+                window.open(pdfBlobUrl, '_blank');
+            }
+
+            // DRUCKEN / PDF GENERIERUNG FÜR EINZELPERSON
             function printPDF() {
                 if (!currentParticipantInDetailsModal) return;
                 const p = currentParticipantInDetailsModal;
@@ -1951,16 +2023,17 @@
                     return;
                 }
                 users.forEach(u => {
+                    const isActive = u.active !== false;
                     const li = document.createElement('li');
-                    li.className = `glass-panel p-3 flex justify-between items-center ${!u.active ? 'user-inactive' : ''}`;
+                    li.className = `glass-panel p-3 flex justify-between items-center ${!isActive ? 'user-inactive' : ''}`;
                     li.innerHTML = `
                         <div>
                             <span class="font-semibold">${u.username}</span> 
                             <span class="text-xs text-[#8e8e93]">(${'*'.repeat(u.code.length)})</span> - ${u.status}
-                            ${!u.active ? ' (inaktiv)' : ''}
+                            ${!isActive ? ' (inaktiv)' : ''}
                         </div>
                         <div class="flex space-x-2">
-                            <button data-id="${u.id}" class="toggle-user-active-button text-[#ff9500] text-sm rounded-button px-2 py-1 bg-white/50">${u.active ? 'Deaktivieren' : 'Aktivieren'}</button>
+                            <button data-id="${u.id}" class="toggle-user-active-button text-[#ff9500] text-sm rounded-button px-2 py-1 bg-white/50">${isActive ? 'Deaktivieren' : 'Aktivieren'}</button>
                             <button data-id="${u.id}" class="change-user-status-button text-[#007aff] text-sm rounded-button px-2 py-1 bg-white/50">${u.status === 'admin' ? '→ Betreuer' : (u.status === 'Betreuungsleitung' ? '→ Admin' : '→ Betreuungsleitung')}</button>
                             <button data-id="${u.id}" data-username="${u.username}" data-type="user" class="delete-item-button text-[#ff3b30] text-sm rounded-button px-2 py-1 bg-white/50">Löschen</button>
                         </div>
@@ -2727,9 +2800,9 @@
                 if (target.classList.contains('toggle-user-active-button')) {
                     const idx = users.findIndex(u => u.id === id);
                     if (idx > -1) {
-                        users[idx].active = !users[idx].active;
+                        users[idx].active = users[idx].active === false ? true : false;
                         saveUsers();
-                        showMessage(`Benutzer ${users[idx].username} wurde ${users[idx].active ? 'aktiviert' : 'deaktiviert'}`, false);
+                        showMessage(`Benutzer ${users[idx].username} wurde ${users[idx].active !== false ? 'aktiviert' : 'deaktiviert'}`, false);
                     }
                 } else if (target.classList.contains('change-user-status-button')) {
                     const idx = users.findIndex(u => u.id === id);
@@ -3057,6 +3130,10 @@
                 if (currentConfirmAction) currentConfirmAction();
                 deleteModal.classList.add('hidden');
                 currentConfirmAction = null;
+            });
+
+            dailyEndReportButton?.addEventListener('click', () => {
+                printDailyEndReportPDF();
             });
 
             importParticipantsButton?.addEventListener('click', () => {
