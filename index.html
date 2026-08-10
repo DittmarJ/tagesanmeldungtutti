@@ -802,16 +802,22 @@
                                 <p class="text-xs font-bold text-[#007aff] mb-2">Kind 1</p>
                                 <input type="text" id="child1-first-name" placeholder="Vorname" class="glass-input w-full p-2 mb-2 rounded-button">
                                 <input type="text" id="child1-last-name" placeholder="Nachname" class="glass-input w-full p-2 mb-2 rounded-button">
+                                <input type="text" id="child1-dob" placeholder="Geburtsdatum (z.B. 12.05.2016)" class="glass-input w-full p-2 mb-2 rounded-button">
+                                <input type="text" id="child1-parent-name" placeholder="Name Erziehungsberechtigte(r)" class="glass-input w-full p-2 rounded-button">
                             </div>
                             <div id="child2-container" class="p-3 rounded-2xl border border-[rgba(0,0,0,0.1)] hidden">
                                 <p class="text-xs font-bold text-[#007aff] mb-2">Kind 2</p>
                                 <input type="text" id="child2-first-name" placeholder="Vorname" class="glass-input w-full p-2 mb-2 rounded-button">
                                 <input type="text" id="child2-last-name" placeholder="Nachname" class="glass-input w-full p-2 mb-2 rounded-button">
+                                <input type="text" id="child2-dob" placeholder="Geburtsdatum (z.B. 12.05.2016)" class="glass-input w-full p-2 mb-2 rounded-button">
+                                <input type="text" id="child2-parent-name" placeholder="Name Erziehungsberechtigte(r)" class="glass-input w-full p-2 rounded-button">
                             </div>
                             <div id="child3-container" class="p-3 rounded-2xl border border-[rgba(0,0,0,0.1)] hidden">
                                 <p class="text-xs font-bold text-[#007aff] mb-2">Kind 3</p>
                                 <input type="text" id="child3-first-name" placeholder="Vorname" class="glass-input w-full p-2 mb-2 rounded-button">
                                 <input type="text" id="child3-last-name" placeholder="Nachname" class="glass-input w-full p-2 mb-2 rounded-button">
+                                <input type="text" id="child3-dob" placeholder="Geburtsdatum (z.B. 12.05.2016)" class="glass-input w-full p-2 mb-2 rounded-button">
+                                <input type="text" id="child3-parent-name" placeholder="Name Erziehungsberechtigte(r)" class="glass-input w-full p-2 rounded-button">
                             </div>
                             <button type="button" id="add-sibling-row-button" class="text-[#007aff] text-sm font-bold flex items-center hover:text-[#0051d5] transition rounded-button px-3 py-2 bg-white/50">
                                 <span class="mr-1 text-lg">+</span> Geschwisterkind hinzufügen
@@ -872,7 +878,7 @@
                         <h4 class="text-md font-medium text-[#1d1d1f] mb-2">Datenverwaltung</h4>
                         <button id="remove-all-participants-button" class="glass-button-danger w-full py-2 rounded-button">Alle Teilnehmer löschen</button>
                         <button id="remove-daily-participants-button" class="glass-button w-full py-2 rounded-button">Tagesanmeldungen löschen</button>
-                        <button id="reset-all-participants-button" class="glass-button w-full py-2 rounded-button">Status zurücksetzen</button>
+                        <button id="reset-all-participants-button" class="glass-button w-full py-2 rounded-button">Status zurücksetzen (inkl. Kommentare & Vollmachten)</button>
                     </div>
                 </div>
             </div>
@@ -935,12 +941,26 @@
             </div>
         </div>
 
+        <!-- RECHTLICHE HINWEISE MODAL (So knapp wie möglich) -->
+        <div id="legal-notice-modal" class="fixed inset-0 modal-glass flex items-center justify-center hidden z-50">
+            <div class="modal-content p-5 w-full max-w-sm mx-4 text-center">
+                <h3 class="text-lg font-bold text-[#1d1d1f] mb-2">⚖️ Rechtliches</h3>
+                <p class="text-xs text-[#6c6c70] mb-4">Nur heute gültig. Abholperson ab 14 Jahren (mit Ausweis).</p>
+                <div class="flex justify-center space-x-3">
+                    <button id="print-from-legal-modal-btn" class="glass-button-success px-4 py-2 text-sm rounded-button">🖨️ Drucken / PDF</button>
+                    <button id="close-legal-modal-btn" class="glass-button px-4 py-2 text-sm rounded-button">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- TEILNEHMER DETAILS MODAL -->
         <div id="participant-details-modal" class="fixed inset-0 modal-glass flex items-center justify-center hidden z-50">
             <div class="modal-content p-5 w-full max-w-md mx-4 max-h-[85vh] overflow-y-auto">
                 <h3 id="details-modal-title" class="text-xl font-bold text-[#1d1d1f] mb-4">Teilnehmerdetails</h3>
                 <div class="space-y-3 text-[#1d1d1f]">
                     <div><strong>Vorname:</strong> <span id="details-first-name-display"></span><input type="text" id="details-first-name-input" class="glass-input w-full mt-1 hidden rounded-button"></div>
                     <div><strong>Nachname:</strong> <span id="details-last-name-display"></span><input type="text" id="details-last-name-input" class="glass-input w-full mt-1 hidden rounded-button"></div>
+                    <div><strong>Geburtsdatum:</strong> <span id="details-dob-display"></span><input type="text" id="details-dob-input" class="glass-input w-full mt-1 hidden rounded-button"></div>
                     <div><strong>Straße:</strong> <span id="details-street-display"></span><input type="text" id="details-street-input" class="glass-input w-full mt-1 hidden rounded-button"></div>
                     <div><strong>Ort:</strong> <span id="details-city-display"></span><input type="text" id="details-city-input" class="glass-input w-full mt-1 hidden rounded-button"></div>
                     <div><strong>Telefon:</strong> <span id="details-phone-display"></span><input type="text" id="details-phone-input" class="glass-input w-full mt-1 hidden rounded-button"></div>
@@ -956,34 +976,64 @@
                     <div id="details-picked-up-by-row" class="hidden"><strong>Abgeholt von:</strong> <span id="details-picked-up-by"></span></div>
                 </div>
 
-                <!-- ERGÄNZUNG: BEREICH ABHOLBERECHTIGUNG & UNTERSCHRIFT -->
+                <!-- BEREICH ABHOLBERECHTIGUNG & UNTERSCHRIFT -->
                 <div class="mt-4 pt-3 border-t">
-                    <button type="button" id="toggle-auth-section-btn" class="glass-button w-full py-2 text-sm font-semibold text-[#007aff] rounded-button">
-                        ✍️ Abholberechtigung & Unterschrift verwalten
+                    <button type="button" id="toggle-auth-section-btn" class="glass-button w-full py-2 text-sm font-semibold text-[#007aff] rounded-button flex items-center justify-center gap-2">
+                        <span>✍️</span>
+                        <span id="auth-section-toggle-label">Abholberechtigung & Unterschrift verwalten</span>
                     </button>
 
                     <div id="auth-section-container" class="hidden mt-3 p-3 bg-white/60 border rounded-2xl">
-                        <label class="block text-xs font-semibold text-[#1d1d1f] mb-1">Berechtigte Dritte Personen:</label>
-                        <input type="text" id="allowed-pickup-input" placeholder="Z.B. Oma Erna, Familie Müller" class="glass-input w-full text-sm p-2 mb-3 rounded-button">
-
-                        <label class="block text-xs font-semibold text-[#1d1d1f] mb-1">Unterschrift der Erziehungsberechtigten:</label>
-                        <div class="signature-canvas-container mb-2">
-                            <canvas id="signature-canvas"></canvas>
-                        </div>
-
-                        <div id="signature-preview-container" class="hidden mb-2">
-                            <p class="text-xs text-[#8e8e93] mb-1">Gespeicherte Unterschrift:</p>
-                            <img id="signature-image-preview" src="" alt="Unterschrift" class="h-16 border rounded-lg bg-white p-1">
-                        </div>
-
-                        <div class="flex flex-col gap-2">
-                            <div class="flex space-x-2">
-                                <button type="button" id="clear-signature-button" class="glass-button text-xs py-1 px-3 rounded-button">Löschen</button>
-                                <button type="button" id="save-signature-button" class="glass-button-primary text-xs py-1 px-3 rounded-button flex-1">Speichern</button>
+                        <!-- ANZEIGE WENN BERECHTIGUNG VORHANDEN -->
+                        <div id="auth-status-display" class="hidden mb-3 p-2 bg-green-50 border border-green-200 rounded-xl text-xs space-y-2">
+                            <p class="font-bold text-green-800">✅ Berechtigung vorhanden</p>
+                            <div class="flex gap-2">
+                                <button type="button" id="open-pdf-from-status-btn" class="glass-button-success text-xs py-1.5 px-3 rounded-button font-bold flex-1">
+                                    📄 PDF öffnen & drucken
+                                </button>
+                                <button type="button" id="edit-auth-btn" class="glass-button text-xs py-1.5 px-3 rounded-button">
+                                    Bearbeiten
+                                </button>
                             </div>
-                            <button type="button" id="download-pdf-button" class="glass-button-success text-xs py-2 px-3 rounded-button w-full font-bold">
-                                📄 Abholberechtigung als PDF herunterladen
-                            </button>
+                        </div>
+
+                        <!-- EINGABE-CONTAINER -->
+                        <div id="auth-form-container" class="space-y-2">
+                            <div>
+                                <label class="block text-xs font-bold text-[#1d1d1f] mb-1">Name Erziehungsberechtigte(r):</label>
+                                <input type="text" id="auth-parent-name-input" placeholder="Vor- und Nachname" class="glass-input w-full text-sm p-2 rounded-button">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-[#1d1d1f] mb-1">Name bevollmächtigte Person:</label>
+                                <input type="text" id="allowed-pickup-person-name" placeholder="Vor- und Nachname" class="glass-input w-full text-sm p-2 rounded-button">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-[#1d1d1f] mb-1">Beziehung zum Kind:</label>
+                                <input type="text" id="allowed-pickup-relation" placeholder="z.B. Oma, Tante, Nachbarin" class="glass-input w-full text-sm p-2 rounded-button">
+                            </div>
+
+                            <label class="block text-xs font-semibold text-[#1d1d1f] pt-1">Unterschreiben:</label>
+                            <div class="signature-canvas-container mb-2">
+                                <canvas id="signature-canvas"></canvas>
+                            </div>
+
+                            <div id="signature-preview-container" class="hidden mb-2">
+                                <p class="text-xs text-[#8e8e93] mb-1">Gespeicherte Unterschrift:</p>
+                                <img id="signature-image-preview" src="" alt="Unterschrift" class="h-16 border rounded-lg bg-white p-1">
+                            </div>
+
+                            <div class="flex flex-col gap-2 mt-2">
+                                <div class="flex space-x-2">
+                                    <button type="button" id="clear-signature-button" class="glass-button text-xs py-1 px-3 rounded-button">Löschen</button>
+                                    <button type="button" id="save-signature-button" class="glass-button-primary text-xs py-1 px-3 rounded-button flex-1 font-bold">Speichern</button>
+                                </div>
+                                <button type="button" id="revoke-auth-button" class="glass-button-danger text-xs py-2 px-3 rounded-button w-full hidden">
+                                    🚫 Abholberechtigung widerrufen
+                                </button>
+                                <button type="button" id="close-auth-section-btn" class="glass-button text-xs py-2 px-3 rounded-button w-full">
+                                    Zurück
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1000,14 +1050,18 @@
                     <ul id="details-activity-history" class="space-y-1 text-sm max-h-32 overflow-y-auto"></ul>
                 </div>
                 
-                <div class="flex justify-end space-x-3 mt-5">
-                    <button id="save-details-button" class="glass-button-primary px-4 py-2 hidden rounded-button">Speichern</button>
-                    <button id="close-details-modal" class="glass-button px-4 py-2 rounded-button">Schließen</button>
+                <div class="flex justify-between items-center mt-5 pt-3 border-t">
+                    <button id="admin-delete-participant-btn" class="glass-button-danger px-3 py-2 text-xs rounded-button hidden">Teilnehmer löschen</button>
+                    <div class="flex space-x-2 ml-auto">
+                        <button id="save-details-button" class="glass-button-primary px-4 py-2 hidden rounded-button">Speichern</button>
+                        <button id="close-details-modal" class="glass-button px-4 py-2 rounded-button">Schließen</button>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div id="pickup-modal" class="fixed inset-0 modal-glass flex items-center justify-center hidden z-50">
+        <!-- ABHOL-MODAL (ABMELDUNG) - Platziert sich ganz oben unter dem Kasten (~3mm) -->
+        <div id="pickup-modal" class="fixed inset-0 modal-glass flex items-start justify-center hidden z-50 pt-[12px]">
             <div class="modal-content p-5 w-full max-w-sm mx-4">
                 <h3 class="text-xl font-bold text-[#1d1d1f] mb-3">Teilnehmer abholen</h3>
                 <p class="mb-3 text-[#6c6c70]">Wer holt <span id="pickup-participant-name" class="font-semibold text-[#1d1d1f]"></span> ab?</p>
@@ -1017,18 +1071,18 @@
                     <span id="allowed-pickup-notice-text"></span>
                 </div>
 
+                <!-- ERWÜNSCHTE ABHOLOPTIONEN -->
                 <select id="pickup-person-select" class="w-full p-2 mb-2 rounded-button">
                     <option value="">Bitte wählen</option>
                     <option value="Mutter">Mutter</option>
                     <option value="Vater">Vater</option>
-                    <option value="Oma">Oma</option>
-                    <option value="Opa">Opa</option>
-                    <option value="Geschwister">Geschwister</option>
-                    <option value="Berechtigte Person">Berechtigte Person (lt. Unterschrift)</option>
+                    <option value="Alleine nach Hause">Alleine nach Hause</option>
+                    <option id="pickup-option-auth" value="Berechtigte Person" class="hidden">Berechtigte Person (lt. Vollmacht)</option>
                     <option value="Sonstige">Sonstige</option>
                 </select>
+                
                 <div id="custom-pickup-person-container" class="hidden mb-3">
-                    <input type="text" id="custom-pickup-person-input" placeholder="Name" class="glass-input w-full p-2 rounded-button">
+                    <input type="text" id="custom-pickup-person-input" placeholder="Name der Person" class="glass-input w-full p-2 rounded-button">
                 </div>
                 <div class="flex justify-end space-x-3">
                     <button id="cancel-pickup" class="glass-button px-4 py-2 rounded-button">Abbrechen</button>
@@ -1166,10 +1220,15 @@
             const cancelDeleteButton = document.getElementById('cancel-delete');
             const confirmDeleteButton = document.getElementById('confirm-delete');
 
+            const legalNoticeModal = document.getElementById('legal-notice-modal');
+            const closeLegalModalBtn = document.getElementById('close-legal-modal-btn');
+            const printFromLegalModalBtn = document.getElementById('print-from-legal-modal-btn');
+
             const participantDetailsModal = document.getElementById('participant-details-modal');
             const detailsModalTitle = document.getElementById('details-modal-title');
             const detailsFirstNameDisplay = document.getElementById('details-first-name-display');
             const detailsLastNameDisplay = document.getElementById('details-last-name-display');
+            const detailsDobDisplay = document.getElementById('details-dob-display');
             const detailsStreetDisplay = document.getElementById('details-street-display');
             const detailsCityDisplay = document.getElementById('details-city-display');
             const detailsPhoneDisplay = document.getElementById('details-phone-display');
@@ -1177,8 +1236,10 @@
             const detailsPaidDisplay = document.getElementById('details-paid-display');
             const detailsCanGoHomeAloneDisplay = document.getElementById('details-can-go-home-alone-display');
             const detailsNoDataDisplay = document.getElementById('details-no-data-display');
+
             const detailsFirstNameInput = document.getElementById('details-first-name-input');
             const detailsLastNameInput = document.getElementById('details-last-name-input');
+            const detailsDobInput = document.getElementById('details-dob-input');
             const detailsStreetInput = document.getElementById('details-street-input');
             const detailsCityInput = document.getElementById('details-city-input');
             const detailsPhoneInput = document.getElementById('details-phone-input');
@@ -1190,26 +1251,37 @@
             const detailsPickedUpByRow = document.getElementById('details-picked-up-by-row');
             const closeDetailsModalButton = document.getElementById('close-details-modal');
             const saveDetailsButton = document.getElementById('save-details-button');
+            const adminDeleteParticipantBtn = document.getElementById('admin-delete-participant-btn');
             const detailsActivityHistory = document.getElementById('details-activity-history');
             const detailsCommentsList = document.getElementById('details-comments-list');
             const newCommentText = document.getElementById('new-comment-text');
             const addCommentButton = document.getElementById('add-comment-button');
             const noDataWarningDetail = document.getElementById('no-data-warning-detail');
 
-            // Ergänzende Canvas & Unterschrift Elements
+            // Canvas & Unterschrift Elements
             const toggleAuthSectionBtn = document.getElementById('toggle-auth-section-btn');
+            const authSectionToggleLabel = document.getElementById('auth-section-toggle-label');
+            const closeAuthSectionBtn = document.getElementById('close-auth-section-btn');
             const authSectionContainer = document.getElementById('auth-section-container');
-            const allowedPickupInput = document.getElementById('allowed-pickup-input');
+            const authStatusDisplay = document.getElementById('auth-status-display');
+            const authFormContainer = document.getElementById('auth-form-container');
+            const openPdfFromStatusBtn = document.getElementById('open-pdf-from-status-btn');
+            const editAuthBtn = document.getElementById('edit-auth-btn');
+
+            const authParentNameInput = document.getElementById('auth-parent-name-input');
+            const allowedPickupPersonName = document.getElementById('allowed-pickup-person-name');
+            const allowedPickupRelation = document.getElementById('allowed-pickup-relation');
             const signatureCanvas = document.getElementById('signature-canvas');
             const saveSignatureButton = document.getElementById('save-signature-button');
             const clearSignatureButton = document.getElementById('clear-signature-button');
-            const downloadPdfButton = document.getElementById('download-pdf-button');
+            const revokeAuthButton = document.getElementById('revoke-auth-button');
             const signaturePreviewContainer = document.getElementById('signature-preview-container');
             const signatureImagePreview = document.getElementById('signature-image-preview');
 
             const pickupModal = document.getElementById('pickup-modal');
             const pickupParticipantName = document.getElementById('pickup-participant-name');
             const pickupPersonSelect = document.getElementById('pickup-person-select');
+            const pickupOptionAuth = document.getElementById('pickup-option-auth');
             const customPickupPersonContainer = document.getElementById('custom-pickup-person-container');
             const customPickupPersonInput = document.getElementById('custom-pickup-person-input');
             const allowedPickupNotice = document.getElementById('allowed-pickup-notice');
@@ -1358,58 +1430,179 @@
                 }
             });
 
+            closeAuthSectionBtn?.addEventListener('click', () => {
+                authSectionContainer.classList.add('hidden');
+            });
+
+            editAuthBtn?.addEventListener('click', () => {
+                authStatusDisplay.classList.add('hidden');
+                authFormContainer.classList.remove('hidden');
+                setTimeout(setupCanvas, 100);
+            });
+
+            openPdfFromStatusBtn?.addEventListener('click', () => {
+                printPDF();
+            });
+
+            // SPEICHERN & RECHTLICHE HINWEISE ÖFFNEN
             saveSignatureButton?.addEventListener('click', async () => {
                 if (!currentParticipantInDetailsModal) return;
-                const allowedPersons = allowedPickupInput.value.trim();
+                const parentName = authParentNameInput.value.trim();
+                const personName = allowedPickupPersonName.value.trim();
+                const relation = allowedPickupRelation.value.trim();
                 const signatureData = signatureCanvas.toDataURL();
+
+                if (!parentName || !personName || !relation) {
+                    showActionFeedback("Bitte alle Felder ausfüllen", false);
+                    return;
+                }
+
+                const combinedInfo = `${personName} (${relation})`;
 
                 const idx = participants.findIndex(p => p.id === currentParticipantInDetailsModal.id);
                 if (idx > -1) {
-                    participants[idx].allowedPickupPersons = allowedPersons;
+                    participants[idx].parentName = parentName;
+                    participants[idx].allowedPickupPersonName = personName;
+                    participants[idx].allowedPickupRelation = relation;
+                    participants[idx].allowedPickupPersons = combinedInfo;
                     participants[idx].signatureImage = signatureData;
                     await saveParticipants();
-                    showActionFeedback("Berechtigung & Unterschrift gespeichert!", true);
                     
                     if (signatureData) {
                         signatureImagePreview.src = signatureData;
                         signaturePreviewContainer.classList.remove('hidden');
                     }
+
+                    updateAuthSectionUI(participants[idx]);
+
+                    // Öffnet das Modal mit den rechtlichen Hinweisen direkt nach dem Speichern
+                    legalNoticeModal.classList.remove('hidden');
                 }
             });
 
-            downloadPdfButton?.addEventListener('click', () => {
+            closeLegalModalBtn?.addEventListener('click', () => {
+                legalNoticeModal.classList.add('hidden');
+            });
+
+            printFromLegalModalBtn?.addEventListener('click', () => {
+                legalNoticeModal.classList.add('hidden');
+                printPDF();
+            });
+
+            function updateAuthSectionUI(participant) {
+                if (participant.allowedPickupPersons && participant.signatureImage) {
+                    authStatusDisplay.classList.remove('hidden');
+                    authFormContainer.classList.add('hidden');
+                    authSectionToggleLabel.textContent = "Berechtigung vorhanden";
+                } else {
+                    authStatusDisplay.classList.add('hidden');
+                    authFormContainer.classList.remove('hidden');
+                    authSectionToggleLabel.textContent = "Abholberechtigung & Unterschrift verwalten";
+                }
+            }
+
+            // WIDERUFEN
+            revokeAuthButton?.addEventListener('click', () => {
+                if (!currentParticipantInDetailsModal) return;
+                showConfirmationModal('Vollmacht widerrufen', 'Möchten Sie die Abholberechtigung wirklich widerrufen?', async () => {
+                    const idx = participants.findIndex(p => p.id === currentParticipantInDetailsModal.id);
+                    if (idx > -1) {
+                        participants[idx].allowedPickupPersonName = '';
+                        participants[idx].allowedPickupRelation = '';
+                        participants[idx].allowedPickupPersons = '';
+                        participants[idx].signatureImage = '';
+                        await saveParticipants();
+                        
+                        authParentNameInput.value = participants[idx].parentName || '';
+                        allowedPickupPersonName.value = '';
+                        allowedPickupRelation.value = '';
+                        clearCanvas();
+                        signaturePreviewContainer.classList.add('hidden');
+                        revokeAuthButton.classList.add('hidden');
+                        
+                        updateAuthSectionUI(participants[idx]);
+                        showActionFeedback("Abholberechtigung widerrufen", true);
+                    }
+                });
+            });
+
+            // DRUCKEN / PDF GENERIERUNG
+            function printPDF() {
                 if (!currentParticipantInDetailsModal) return;
                 const p = currentParticipantInDetailsModal;
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
 
-                doc.setFontSize(20);
-                doc.text("Abholberechtigung Ferienprogramm", 20, 20);
+                const today = new Date().toLocaleDateString('de-DE');
+                const parentNameFromInput = authParentNameInput.value.trim() || p.parentName || '---';
 
-                doc.setFontSize(12);
-                doc.text(`Kind: ${p.name}`, 20, 40);
-                doc.text(`Telefon: ${p.phone || 'Nicht angegeben'}`, 20, 50);
-                doc.text(`Anmeldeart: ${p.registrationType}`, 20, 60);
-
-                doc.setLineWidth(0.5);
-                doc.line(20, 68, 190, 68);
-
-                doc.setFontSize(14);
-                doc.text("Berechtigte Personen zur Abholung:", 20, 80);
-                doc.setFontSize(12);
-                doc.text(p.allowedPickupPersons || "Keine dritten Personen angegeben", 20, 90);
-
-                if (p.signatureImage) {
-                    doc.setFontSize(14);
-                    doc.text("Unterschrift der Erziehungsberechtigten:", 20, 115);
-                    doc.addImage(p.signatureImage, 'PNG', 20, 125, 100, 40);
-                }
+                doc.setFontSize(18);
+                doc.setFont("helvetica", "bold");
+                doc.text("VOLLMACHT ZUR ABHOLUNG EINES KINDES", 105, 20, { align: "center" });
 
                 doc.setFontSize(10);
-                doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 20, 180);
+                doc.setFont("helvetica", "normal");
+                doc.text("(Tagesgültige Abholberechtigung)", 105, 27, { align: "center" });
 
-                doc.save(`Abholberechtigung_${p.name.replace(/\s+/g, '_')}.pdf`);
-            });
+                doc.setLineWidth(0.5);
+                doc.line(20, 32, 190, 32);
+
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "bold");
+                doc.text("1. Angaben zum Kind", 20, 42);
+                
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Vollständiger Name: ${p.name || '---'}`, 25, 50);
+                doc.text(`Geburtsdatum: ${p.dob || 'Nicht hinterlegt'}`, 25, 57);
+
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "bold");
+                doc.text("2. Erziehungsberechtigte(r) (Vollmachtgeber)", 20, 70);
+
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Vollständiger Name: ${parentNameFromInput}`, 25, 78);
+                doc.text(`Anschrift (vom Kind): ${p.street || '---'}, ${p.city || '---'}`, 25, 85);
+                doc.text(`Telefonnummer (vom Kind): ${p.phone || '---'}`, 25, 92);
+
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "bold");
+                doc.text("3. Bevollmächtigte Person (Abholperson)", 20, 105);
+
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Vollständiger Name: ${allowedPickupPersonName.value.trim() || p.allowedPickupPersonName || p.allowedPickupPersons || '---'}`, 25, 113);
+                doc.text(`Beziehung zum Kind: ${allowedPickupRelation.value.trim() || p.allowedPickupRelation || 'Keine Angabe'}`, 25, 120);
+
+                doc.setFontSize(12);
+                doc.setFont("helvetica", "bold");
+                doc.text("4. Gültigkeit & Rechtliche Hinweise", 20, 133);
+
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "normal");
+                doc.text(`• Die Vollmacht gilt AUSSCHLIESSLICH für den heutigen Tag (${today}).`, 25, 141);
+                doc.text(`• Die abholende Person muss MINDESTENS 14 JAHRE alt sein.`, 25, 147);
+                doc.text(`• Die abholende Person muss sich auf Verlangen durch einen Lichtbildausweis ausweisen.`, 25, 153);
+
+                doc.setLineWidth(0.3);
+                doc.line(20, 165, 190, 165);
+
+                doc.setFontSize(11);
+                doc.setFont("helvetica", "bold");
+                doc.text("Eigenhändige Unterschrift der/des Erziehungsberechtigten:", 20, 175);
+
+                if (p.signatureImage) {
+                    doc.addImage(p.signatureImage, 'PNG', 20, 180, 80, 35);
+                }
+
+                doc.setFontSize(9);
+                doc.setFont("helvetica", "normal");
+                doc.text(`Ausgestellt und digital erfasst am: ${today}`, 20, 222);
+
+                const pdfBlobUrl = doc.output('bloburl');
+                window.open(pdfBlobUrl, '_blank');
+            }
 
             function playAlarmSound() {
                 if (alarmAudio) {
@@ -1528,12 +1721,13 @@
                 if (child3Div) child3Div.classList.add('hidden');
                 if (addSiblingBtn) addSiblingBtn.classList.remove('hidden');
                 
-                if (document.getElementById('child1-first-name')) document.getElementById('child1-first-name').value = '';
-                if (document.getElementById('child1-last-name')) document.getElementById('child1-last-name').value = '';
-                if (document.getElementById('child2-first-name')) document.getElementById('child2-first-name').value = '';
-                if (document.getElementById('child2-last-name')) document.getElementById('child2-last-name').value = '';
-                if (document.getElementById('child3-first-name')) document.getElementById('child3-first-name').value = '';
-                if (document.getElementById('child3-last-name')) document.getElementById('child3-last-name').value = '';
+                ['child1', 'child2', 'child3'].forEach(prefix => {
+                    if (document.getElementById(`${prefix}-first-name`)) document.getElementById(`${prefix}-first-name`).value = '';
+                    if (document.getElementById(`${prefix}-last-name`)) document.getElementById(`${prefix}-last-name`).value = '';
+                    if (document.getElementById(`${prefix}-dob`)) document.getElementById(`${prefix}-dob`).value = '';
+                    if (document.getElementById(`${prefix}-parent-name`)) document.getElementById(`${prefix}-parent-name`).value = '';
+                });
+
                 if (newParticipantStreetInput) newParticipantStreetInput.value = '';
                 if (newParticipantCityInput) newParticipantCityInput.value = '';
                 if (newParticipantPhoneInput) newParticipantPhoneInput.value = '';
@@ -1784,8 +1978,8 @@
                             loadedParticipants = JSON.parse(storedLegacy);
                         } else {
                             loadedParticipants = [
-                                { id: Date.now() + 'A', name: 'Lea Schneider', status: 'available', registrationType: 'Tagesanmeldung', street: 'Musterweg 1', city: 'Musterstadt', phone: '01761234567', paid: true, canGoHomeAlone: false, noData: false, present: false, pickedUpBy: '', allowedPickupPersons: '', signatureImage: '', activityHistory: [], comments: [] },
-                                { id: Date.now() + 'B', name: 'Max Mustermann', status: 'available', registrationType: 'Wochenanmeldung', street: 'Beispielallee 5', city: 'Beispielort', phone: '01519876543', paid: false, canGoHomeAlone: true, noData: false, present: false, pickedUpBy: '', allowedPickupPersons: '', signatureImage: '', activityHistory: [], comments: [] }
+                                { id: Date.now() + 'A', name: 'Lea Schneider', dob: '14.03.2016', parentName: 'Sabine Schneider', status: 'available', registrationType: 'Tagesanmeldung', street: 'Musterweg 1', city: 'Musterstadt', phone: '01761234567', paid: true, canGoHomeAlone: false, noData: false, present: false, pickedUpBy: '', allowedPickupPersons: '', allowedPickupPersonName: '', allowedPickupRelation: '', signatureImage: '', activityHistory: [], comments: [] },
+                                { id: Date.now() + 'B', name: 'Max Mustermann', dob: '22.08.2015', parentName: 'Erika Mustermann', status: 'available', registrationType: 'Wochenanmeldung', street: 'Beispielallee 5', city: 'Beispielort', phone: '01519876543', paid: false, canGoHomeAlone: true, noData: false, present: false, pickedUpBy: '', allowedPickupPersons: '', allowedPickupPersonName: '', allowedPickupRelation: '', signatureImage: '', activityHistory: [], comments: [] }
                             ];
                         }
                     }
@@ -1793,6 +1987,8 @@
                     participants = loadedParticipants.map(p => ({
                         id: String(p.id),
                         name: p.name || '',
+                        dob: p.dob || '',
+                        parentName: p.parentName || '',
                         status: p.status || 'available',
                         registrationType: p.registrationType || 'Tagesanmeldung',
                         street: p.street || '',
@@ -1804,6 +2000,8 @@
                         present: p.present || false,
                         pickedUpBy: p.pickedUpBy || '',
                         allowedPickupPersons: p.allowedPickupPersons || '',
+                        allowedPickupPersonName: p.allowedPickupPersonName || '',
+                        allowedPickupRelation: p.allowedPickupRelation || '',
                         signatureImage: p.signatureImage || '',
                         activityHistory: p.activityHistory || [],
                         comments: p.comments || []
@@ -1817,6 +2015,8 @@
                 const toSave = participants.map(p => ({
                     id: String(p.id),
                     name: p.name,
+                    dob: p.dob || '',
+                    parentName: p.parentName || '',
                     status: p.status,
                     registrationType: p.registrationType,
                     street: p.street,
@@ -1828,6 +2028,8 @@
                     present: p.present || false,
                     pickedUpBy: p.pickedUpBy,
                     allowedPickupPersons: p.allowedPickupPersons || '',
+                    allowedPickupPersonName: p.allowedPickupPersonName || '',
+                    allowedPickupRelation: p.allowedPickupRelation || '',
                     signatureImage: p.signatureImage || '',
                     activityHistory: p.activityHistory,
                     comments: p.comments
@@ -1973,10 +2175,8 @@
                             <option value="">Bitte wählen</option>
                             <option value="Mutter">Mutter</option>
                             <option value="Vater">Vater</option>
-                            <option value="Oma">Oma</option>
-                            <option value="Opa">Opa</option>
-                            <option value="Geschwister">Geschwister</option>
-                            <option value="Berechtigte Person">Berechtigte Person (lt. Unterschrift)</option>
+                            <option value="Alleine nach Hause">Alleine nach Hause</option>
+                            <option value="Berechtigte Person">Berechtigte Person (lt. Vollmacht)</option>
                             <option value="Sonstige">Sonstige (bitte angeben)</option>
                         </select>
                         <div id="family-custom-pickup-container" class="hidden mt-2">
@@ -2075,7 +2275,7 @@
                     }
                 } else if (!pickupPerson) {
                     pickupFamilyMessage.textContent = 'Bitte wählen Sie eine Abholperson aus.';
-                    pickupFamilyMessage.classList.remove('hidden');
+                    pickupFamilyMessage.classList.add('hidden');
                     return;
                 }
                 
@@ -2089,10 +2289,12 @@
                 pendingFamilyPickupMembers = null;
             }
 
-            function addChild(firstName, lastName, regType, noData, street, city, phone, paid, canGoHomeAlone, signIn = false) {
+            function addChild(firstName, lastName, dob, parentName, regType, noData, street, city, phone, paid, canGoHomeAlone, signIn = false) {
                 const newP = {
                     id: Date.now().toString(),
                     name: `${firstName} ${lastName}`,
+                    dob: dob || '',
+                    parentName: parentName || '',
                     status: signIn ? 'signedIn' : 'available',
                     registrationType: regType,
                     street: noData ? '' : street,
@@ -2103,6 +2305,8 @@
                     noData: noData,
                     pickedUpBy: '',
                     allowedPickupPersons: '',
+                    allowedPickupPersonName: '',
+                    allowedPickupRelation: '',
                     signatureImage: '',
                     present: false,
                     activityHistory: signIn ? [{ type: 'Angemeldet', time: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'System' }] : [],
@@ -2172,11 +2376,12 @@
             }
 
             function setAdminEditMode(isEditing) {
-                const displays = [detailsFirstNameDisplay, detailsLastNameDisplay, detailsStreetDisplay, detailsCityDisplay, detailsPhoneDisplay, detailsRegtypeDisplay, detailsPaidDisplay, detailsCanGoHomeAloneDisplay, detailsNoDataDisplay];
-                const inputs = [detailsFirstNameInput, detailsLastNameInput, detailsStreetInput, detailsCityInput, detailsPhoneInput, detailsRegtypeSelect, detailsPaidInput, detailsCanGoHomeAloneInput, detailsNoDataInput];
+                const displays = [detailsFirstNameDisplay, detailsLastNameDisplay, detailsDobDisplay, detailsStreetDisplay, detailsCityDisplay, detailsPhoneDisplay, detailsRegtypeDisplay, detailsPaidDisplay, detailsCanGoHomeAloneDisplay, detailsNoDataDisplay];
+                const inputs = [detailsFirstNameInput, detailsLastNameInput, detailsDobInput, detailsStreetInput, detailsCityInput, detailsPhoneInput, detailsRegtypeSelect, detailsPaidInput, detailsCanGoHomeAloneInput, detailsNoDataInput];
                 displays.forEach(el => { if(el) el.classList.toggle('hidden', isEditing); });
                 inputs.forEach(el => { if(el) el.classList.toggle('hidden', !isEditing); });
                 if (saveDetailsButton) saveDetailsButton.classList.toggle('hidden', !isEditing);
+                if (adminDeleteParticipantBtn) adminDeleteParticipantBtn.classList.toggle('hidden', !isEditing);
             }
 
             function showConfirmationModal(title, msg, callback) {
@@ -2240,6 +2445,8 @@
                     overlayAddButton.addEventListener('click', () => {
                         const firstName = adminOverlayContent.querySelector('#child1-first-name')?.value.trim();
                         const lastName = adminOverlayContent.querySelector('#child1-last-name')?.value.trim();
+                        const dob = adminOverlayContent.querySelector('#child1-dob')?.value.trim();
+                        const parentName = adminOverlayContent.querySelector('#child1-parent-name')?.value.trim();
                         
                         if (!firstName || !lastName) {
                             const msgDiv = adminOverlayContent.querySelector('#add-participant-manual-message');
@@ -2254,7 +2461,7 @@
                         const paid = newParticipantPaidCheckbox?.checked || false;
                         const canGoHomeAlone = newParticipantCanGoHomeAloneCheckbox?.checked || false;
                         
-                        addChild(firstName, lastName, regType, noData, street, city, phone, paid, canGoHomeAlone, false);
+                        addChild(firstName, lastName, dob, parentName, regType, noData, street, city, phone, paid, canGoHomeAlone, false);
                         saveParticipants();
                         const msgDiv = adminOverlayContent.querySelector('#add-participant-manual-message');
                         if (msgDiv) showAdminMessage(msgDiv, `${firstName} ${lastName} hinzugefügt`, false);
@@ -2269,6 +2476,8 @@
                     overlayAddAndSignin.addEventListener('click', () => {
                         const firstName = adminOverlayContent.querySelector('#child1-first-name')?.value.trim();
                         const lastName = adminOverlayContent.querySelector('#child1-last-name')?.value.trim();
+                        const dob = adminOverlayContent.querySelector('#child1-dob')?.value.trim();
+                        const parentName = adminOverlayContent.querySelector('#child1-parent-name')?.value.trim();
                         
                         if (!firstName || !lastName) {
                             const msgDiv = adminOverlayContent.querySelector('#add-participant-manual-message');
@@ -2283,7 +2492,7 @@
                         const paid = newParticipantPaidCheckbox?.checked || false;
                         const canGoHomeAlone = newParticipantCanGoHomeAloneCheckbox?.checked || false;
                         
-                        addChild(firstName, lastName, regType, noData, street, city, phone, paid, canGoHomeAlone, true);
+                        addChild(firstName, lastName, dob, parentName, regType, noData, street, city, phone, paid, canGoHomeAlone, true);
                         saveParticipants();
                         const msgDiv = adminOverlayContent.querySelector('#add-participant-manual-message');
                         if (msgDiv) showAdminMessage(msgDiv, `${firstName} ${lastName} hinzugefügt und angemeldet`, false);
@@ -2335,6 +2544,7 @@
                 if (pickupFamilyModal) pickupFamilyModal.classList.add('hidden');
                 if (pickupModal) pickupModal.classList.add('hidden');
                 if (participantDetailsModal) participantDetailsModal.classList.add('hidden');
+                if (legalNoticeModal) legalNoticeModal.classList.add('hidden');
                 if (adminOverlay) adminOverlay.classList.add('hidden');
                 if (alarmModal) alarmModal.classList.add('hidden');
                 if (alarmConfirmModal) alarmConfirmModal.classList.add('hidden');
@@ -2647,30 +2857,23 @@
                             saveParticipants();
                             resetSearchAndFilter();
                         } else if (action === 'abmelden' && p.status === 'signedIn') {
-                            if (!p.canGoHomeAlone) {
-                                currentParticipantBeingPickedUp = p;
-                                pickupParticipantName.textContent = p.name;
-                                pickupPersonSelect.value = "";
-                                customPickupPersonInput.value = "";
-                                customPickupPersonContainer.classList.add('hidden');
-                                pickupMessageBox.classList.add('hidden');
+                            currentParticipantBeingPickedUp = p;
+                            pickupParticipantName.textContent = p.name;
+                            pickupPersonSelect.value = "";
+                            customPickupPersonInput.value = "";
+                            customPickupPersonContainer.classList.add('hidden');
+                            pickupMessageBox.classList.add('hidden');
 
-                                if (p.allowedPickupPersons) {
-                                    allowedPickupNoticeText.textContent = `${p.allowedPickupPersons}`;
-                                    allowedPickupNotice.classList.remove('hidden');
-                                } else {
-                                    allowedPickupNotice.classList.add('hidden');
-                                }
-
-                                pickupModal.classList.remove('hidden');
+                            if (p.allowedPickupPersons) {
+                                allowedPickupNoticeText.textContent = `${p.allowedPickupPersons}`;
+                                allowedPickupNotice.classList.remove('hidden');
+                                pickupOptionAuth.classList.remove('hidden');
                             } else {
-                                p.status = 'available';
-                                p.pickedUpBy = 'Alleine nach Hause';
-                                p.activityHistory.push({ type: 'Abgemeldet', time: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'Unbekannt', pickup: 'Alleine nach Hause' });
-                                showActionFeedback(`${p.name} abgemeldet`, false);
-                                saveParticipants();
-                                resetSearchAndFilter();
+                                allowedPickupNotice.classList.add('hidden');
+                                pickupOptionAuth.classList.add('hidden');
                             }
+
+                            pickupModal.classList.remove('hidden');
                         }
                     }
                     resetInactivityTimer();
@@ -2685,6 +2888,7 @@
                         const last = parts.join(' ') || '';
                         detailsFirstNameDisplay.textContent = first;
                         detailsLastNameDisplay.textContent = last;
+                        detailsDobDisplay.textContent = participant.dob || 'Nicht hinterlegt';
                         detailsStreetDisplay.textContent = participant.noData ? '---' : (participant.street || 'N/A');
                         detailsCityDisplay.textContent = participant.noData ? '---' : (participant.city || 'N/A');
                         detailsPhoneDisplay.textContent = participant.noData ? '---' : (participant.phone || 'N/A');
@@ -2703,18 +2907,28 @@
                             detailsPickedUpByRow?.classList.remove('hidden');
                         } else detailsPickedUpByRow?.classList.add('hidden');
 
-                        allowedPickupInput.value = participant.allowedPickupPersons || '';
+                        authParentNameInput.value = participant.parentName || '';
+                        allowedPickupPersonName.value = participant.allowedPickupPersonName || '';
+                        allowedPickupRelation.value = participant.allowedPickupRelation || '';
+
                         if (authSectionContainer) authSectionContainer.classList.add('hidden');
+
+                        const isAdminOrLead = currentLoggedInUserStatus === 'admin' || currentLoggedInUserStatus === 'Betreuungsleitung';
 
                         if (participant.signatureImage) {
                             signatureImagePreview.src = participant.signatureImage;
                             signaturePreviewContainer.classList.remove('hidden');
+                            if (isAdminOrLead && revokeAuthButton) revokeAuthButton.classList.remove('hidden');
                         } else {
                             signaturePreviewContainer.classList.add('hidden');
+                            if (revokeAuthButton) revokeAuthButton.classList.add('hidden');
                         }
+
+                        updateAuthSectionUI(participant);
                         
                         detailsFirstNameInput.value = first;
                         detailsLastNameInput.value = last;
+                        detailsDobInput.value = participant.dob || '';
                         detailsStreetInput.value = participant.street || '';
                         detailsCityInput.value = participant.city || '';
                         detailsPhoneInput.value = participant.phone || '';
@@ -2759,11 +2973,24 @@
             });
 
             closeDetailsModalButton?.addEventListener('click', () => participantDetailsModal.classList.add('hidden'));
+            
+            adminDeleteParticipantBtn?.addEventListener('click', () => {
+                if (!currentParticipantInDetailsModal || currentLoggedInUserStatus !== 'admin') return;
+                showConfirmationModal('Teilnehmer löschen', `Möchten Sie <strong>${currentParticipantInDetailsModal.name}</strong> wirklich gelöscht werden?`, async () => {
+                    participants = participants.filter(p => p.id !== currentParticipantInDetailsModal.id);
+                    await saveParticipants();
+                    showActionFeedback("Teilnehmer gelöscht", true);
+                    participantDetailsModal.classList.add('hidden');
+                    renderParticipantList();
+                });
+            });
+
             saveDetailsButton?.addEventListener('click', () => {
                 if (!currentParticipantInDetailsModal || currentLoggedInUserStatus !== 'admin') return;
                 const idx = participants.findIndex(p => p.id === currentParticipantInDetailsModal.id);
                 if (idx === -1) return;
                 currentParticipantInDetailsModal.name = `${detailsFirstNameInput.value.trim()} ${detailsLastNameInput.value.trim()}`.trim();
+                currentParticipantInDetailsModal.dob = detailsDobInput.value.trim();
                 currentParticipantInDetailsModal.street = detailsStreetInput.value.trim();
                 currentParticipantInDetailsModal.city = detailsCityInput.value.trim();
                 currentParticipantInDetailsModal.phone = detailsPhoneInput.value.trim();
@@ -2849,6 +3076,8 @@
                         if (vals.length >= 7) {
                             const nameIdx = headers.indexOf('Name');
                             const vornameIdx = headers.indexOf('Vorname');
+                            const dobIdx = headers.indexOf('Geburtsdatum');
+                            const parentIdx = headers.indexOf('Erziehungsberechtigte');
                             const strIdx = headers.indexOf('Straße');
                             const ortIdx = headers.indexOf('Ort');
                             const telIdx = headers.indexOf('Tel.');
@@ -2859,6 +3088,8 @@
                                 const newP = {
                                     id: Date.now() + '-' + i,
                                     name: `${vals[vornameIdx]} ${vals[nameIdx]}`.trim(),
+                                    dob: dobIdx !== -1 ? (vals[dobIdx] || '') : '',
+                                    parentName: parentIdx !== -1 ? (vals[parentIdx] || '') : '',
                                     status: 'available',
                                     registrationType: (regIdx !== -1 && vals[regIdx] && ['Tagesanmeldung','Wochenanmeldung'].includes(String(vals[regIdx]))) ? String(vals[regIdx]) : 'Tagesanmeldung',
                                     street: strIdx !== -1 ? (vals[strIdx] || '') : '',
@@ -2870,6 +3101,8 @@
                                     present: false,
                                     pickedUpBy: '',
                                     allowedPickupPersons: '',
+                                    allowedPickupPersonName: '',
+                                    allowedPickupRelation: '',
                                     signatureImage: '',
                                     activityHistory: [],
                                     comments: []
@@ -2890,6 +3123,8 @@
             addParticipantManualButton?.addEventListener('click', () => {
                 const firstName = document.getElementById('child1-first-name')?.value.trim();
                 const lastName = document.getElementById('child1-last-name')?.value.trim();
+                const dob = document.getElementById('child1-dob')?.value.trim();
+                const parentName = document.getElementById('child1-parent-name')?.value.trim();
                 
                 if (!firstName || !lastName) {
                     showAdminMessage(addParticipantManualMessage, "Vor- und Nachname erforderlich", true);
@@ -2903,7 +3138,7 @@
                 const paid = newParticipantPaidCheckbox?.checked || false;
                 const canGoHomeAlone = newParticipantCanGoHomeAloneCheckbox?.checked || false;
                 
-                addChild(firstName, lastName, regType, noData, street, city, phone, paid, canGoHomeAlone, false);
+                addChild(firstName, lastName, dob, parentName, regType, noData, street, city, phone, paid, canGoHomeAlone, false);
                 saveParticipants();
                 showAdminMessage(addParticipantManualMessage, `${firstName} ${lastName} hinzugefügt`, false);
                 resetParticipantManagementForm();
@@ -2914,6 +3149,8 @@
             addAndSignin?.addEventListener('click', () => {
                 const firstName = document.getElementById('child1-first-name')?.value.trim();
                 const lastName = document.getElementById('child1-last-name')?.value.trim();
+                const dob = document.getElementById('child1-dob')?.value.trim();
+                const parentName = document.getElementById('child1-parent-name')?.value.trim();
                 
                 if (!firstName || !lastName) {
                     showAdminMessage(addParticipantManualMessage, "Vor- und Nachname erforderlich", true);
@@ -2927,7 +3164,7 @@
                 const paid = newParticipantPaidCheckbox?.checked || false;
                 const canGoHomeAlone = newParticipantCanGoHomeAloneCheckbox?.checked || false;
                 
-                addChild(firstName, lastName, regType, noData, street, city, phone, paid, canGoHomeAlone, true);
+                addChild(firstName, lastName, dob, parentName, regType, noData, street, city, phone, paid, canGoHomeAlone, true);
                 saveParticipants();
                 showAdminMessage(addParticipantManualMessage, `${firstName} ${lastName} hinzugefügt und angemeldet`, false);
                 resetParticipantManagementForm();
@@ -2975,17 +3212,21 @@
             });
 
             resetAllParticipantsButton?.addEventListener('click', () => {
-                showConfirmationModal('Zurücksetzen', 'Status und Aktivitäten zurücksetzen?', async () => {
+                showConfirmationModal('Zurücksetzen', 'Status, Aktivitäten, KOMMENTARE und ABHOLBERECHTIGUNGEN aller Teilnehmer zurücksetzen?', async () => {
                     participants.forEach(p => {
                         p.status = 'available';
                         p.pickedUpBy = '';
                         p.activityHistory = [];
                         p.comments = [];
                         p.present = false;
+                        p.allowedPickupPersonName = '';
+                        p.allowedPickupRelation = '';
+                        p.allowedPickupPersons = '';
+                        p.signatureImage = '';
                     });
                     await saveParticipants();
                     alarmActive = false;
-                    showMessage("Zurückgesetzt", false);
+                    showMessage("Alle Daten & Vollmachten zurückgesetzt", false);
                 });
             });
 
