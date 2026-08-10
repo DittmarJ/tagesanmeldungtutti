@@ -2,486 +2,3015 @@
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tutti Kiesi Ferienprogramm - Tagesanmeldung</title>
-    <link rel="icon" href="data:,">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Ferienprogramm Anmelde-App</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- SheetJS (xlsx.js) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+    <!-- jsPDF für PDF-Generierung der Abholberechtigung -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            line-height: 1.6;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-        }
-        .form-container {
-            background-color: #f9f9f9;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-        }
-        input[type="text"],
-        input[type="tel"],
-        input[type="date"],
-        textarea {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
-        }
-        .current-date {
-            padding: 8px;
-            background-color: #eee;
-            border-radius: 4px;
-            margin-bottom: 15px;
-        }
-        .checkbox-group {
-            margin: 15px 0;
-        }
-        .checkbox-label {
+            background-image: url('https://raw.githubusercontent.com/DittmarJ/tuttikiesiferien/main/Bildschirmfoto%202026-04-04%20um%2022.14.13.png');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
             display: flex;
             align-items: center;
-            margin-bottom: 8px;
+            justify-content: center;
+            padding: 1rem;
+            margin: 0;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(20px);
+            border-radius: 2rem;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+        }
+        
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 1.5rem;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+        
+        .glass-input {
+            background: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 2rem;
+            color: #1d1d1f;
+            transition: all 0.2s ease;
+            padding: 0.75rem 1rem;
+        }
+        
+        .glass-input:focus {
+            outline: none;
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+        
+        .glass-input::placeholder {
+            color: #8e8e93;
+        }
+        
+        .glass-button {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 2rem;
+            color: #1d1d1f;
+            font-weight: 500;
+            transition: all 0.2s ease;
             cursor: pointer;
+            padding: 0.75rem 1.5rem;
         }
-        .checkbox-label input {
-            margin-right: 10px;
+        
+        .glass-button:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        .signature-container {
-            margin: 20px 0;
+        
+        .glass-button:active {
+            transform: translateY(0);
         }
-        .submit-btn {
-            background-color: #2ecc71;
+        
+        .glass-button-primary {
+            background: rgba(0, 122, 255, 0.95);
+            border-color: rgba(0, 122, 255, 0.3);
             color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            display: block;
-            width: 100%;
-            margin-top: 20px;
         }
-        .required:after {
-            content: " *";
-            color: red;
+        
+        .glass-button-primary:hover {
+            background: rgba(0, 122, 255, 1);
         }
-        .error {
-            color: red;
-            font-size: 0.9em;
-            margin-top: 5px;
-        }
-        .logo {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .admin-section {
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #eef;
-            border-radius: 8px;
-        }
-        #exportControls {
-            display: none;
-            margin-top: 20px;
-        }
-        .admin-btn {
-            background-color: #e74c3c;
+        
+        .glass-button-success {
+            background: rgba(52, 199, 89, 0.95);
+            border-color: rgba(52, 199, 89, 0.3);
             color: white;
+        }
+        
+        .glass-button-success:hover {
+            background: rgba(52, 199, 89, 1);
+        }
+        
+        .glass-button-danger {
+            background: rgba(255, 59, 48, 0.95);
+            border-color: rgba(255, 59, 48, 0.3);
+            color: white;
+        }
+        
+        .glass-button-danger:hover {
+            background: rgba(255, 59, 48, 1);
+        }
+        
+        .sort-select {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 2rem;
+            color: #1d1d1f;
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .sort-select:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .participant-item-container {
+            position: relative;
+            overflow: hidden;
+            border-radius: 1rem;
+            margin-bottom: 0.75rem;
+            cursor: grab;
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            transition: all 0.2s ease;
+        }
+        
+        .participant-item-container:active {
+            cursor: grabbing;
+        }
+        
+        .participant-item-container:hover {
+            background: rgba(255, 255, 255, 0.85);
+            transform: translateX(2px);
+        }
+        
+        .participant-content-wrapper {
+            padding: 0.875rem 1rem;
+            position: relative;
+            z-index: 10;
+            transition: transform 0.3s ease-out;
+            touch-action: pan-y;
+            background: transparent;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .participant-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex: 1;
+        }
+        
+        .participant-right {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-shrink: 0;
+        }
+        
+        .participant-action-button-container {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            right: 0;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-out;
+            z-index: 5;
+            padding-right: 1rem;
+        }
+        
+        .participant-item-container.swiped .participant-action-button-container {
+            transform: translateX(0);
+        }
+        
+        .participant-item-container.swiped .participant-content-wrapper {
+            transform: translateX(-120px);
+        }
+        
+        .participant-action-button {
+            border-radius: 2rem;
+            font-weight: 600;
+            padding: 0.5rem 1.25rem;
+            white-space: nowrap;
             border: none;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .participant-action-button.anmelden-button {
+            background: #34c759;
+            color: white;
+            box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
+        }
+        
+        .participant-action-button.abmelden-button {
+            background: #ff3b30;
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
+        }
+        
+        .participant-action-button.anwesend-button {
+            background: #007aff;
+            color: white;
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
+        }
+        
+        .info-icon {
+            font-weight: 600;
+            cursor: pointer;
+            color: #007aff;
+            background: rgba(0, 122, 255, 0.1);
+            width: 32px;
+            height: 32px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 2rem;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+        
+        .info-icon:hover {
+            background: rgba(0, 122, 255, 0.2);
+            transform: scale(1.05);
+        }
+        
+        .comment-icon {
+            background: rgba(0, 122, 255, 0.15);
+            color: #007aff;
+            border-radius: 2rem;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            cursor: help;
+        }
+
+        .auth-icon {
+            background: rgba(52, 199, 89, 0.15);
+            color: #34c759;
+            border-radius: 2rem;
+            width: 28px;
+            height: 28px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+        
+        .admin-nav-button {
+            font-weight: 500;
+            padding: 0.75rem 1rem;
+            border-radius: 2rem;
+            transition: all 0.2s ease-in-out;
             cursor: pointer;
             width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(4px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            color: #1d1d1f;
         }
-        .admin-btn.export {
-            background-color: #2ecc71;
+        
+        .admin-nav-button:not(.active):hover {
+            background: rgba(255, 255, 255, 0.95);
+            transform: translateX(4px);
         }
-        .terms-modal {
-            display: none;
+        
+        .admin-nav-button.active {
+            background: rgba(0, 122, 255, 0.95);
+            border-color: rgba(0, 122, 255, 0.3);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.2);
+        }
+        
+        .admin-nav-button.hidden-nav {
+            display: none !important;
+        }
+        
+        #action-feedback-message {
+            transform: translateY(-100%);
+            opacity: 0;
+            transition: transform 0.5s ease-out, opacity 0.5s ease-out;
+        }
+        
+        #action-feedback-message.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .keypad-button {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(0, 0, 0, 0.08);
+            border-radius: 2rem;
+            color: #1d1d1f;
+            font-weight: 600;
+            padding: 1rem;
+            font-size: 1.5rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .keypad-button:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: scale(0.98);
+        }
+        
+        .modal-glass {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+        }
+        
+        .modal-content {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        select, input, textarea {
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 2rem;
+            color: #1d1d1f;
+            padding: 0.75rem 1rem;
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
+        }
+        
+        label {
+            color: #1d1d1f;
+        }
+        
+        .text-gray-600, .text-gray-500, .text-gray-700, .text-gray-800 {
+            color: #6c6c70 !important;
+        }
+        
+        hr, .border-t, .border-b {
+            border-color: rgba(0, 0, 0, 0.1) !important;
+        }
+        
+        .no-data-warning-detail {
+            background: rgba(255, 149, 0, 0.1);
+            border-left: 3px solid #ff9500;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            margin: 0.5rem 0;
+            color: #ff9500;
+            font-size: 0.8rem;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 2rem;
+            flex-shrink: 0;
+        }
+        
+        .status-dot-green { background-color: #34c759; }
+        .status-dot-gray { background-color: #8e8e93; }
+        .status-dot-red { background-color: #ff3b30; }
+        .status-dot-blue { background-color: #007aff; }
+        
+        .participant-name {
+            font-weight: 500;
+            color: #1d1d1f;
+        }
+        
+        .participant-meta {
+            color: #8e8e93;
+            font-size: 0.75rem;
+        }
+        
+        .user-inactive {
+            opacity: 0.6;
+            text-decoration: line-through;
+        }
+        
+        .family-modal-item {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            transition: all 0.2s ease;
+        }
+        
+        .family-modal-item:hover {
+            background: rgba(255, 255, 255, 1);
+            transform: translateX(4px);
+        }
+        
+        .rounded-button {
+            border-radius: 2rem !important;
+        }
+        
+        .pickup-for-family-item {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-overlay {
             position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .admin-overlay-content {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(16px);
+            border-radius: 1.5rem;
+            max-width: 90vw;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 1.5rem;
+        }
+        
+        .alarm-stats {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 1rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .stat-card {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 0.75rem;
+            padding: 0.75rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .stat-card:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: #6c6c70;
+        }
+        
+        .alarm-filter-buttons {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .alarm-filter-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            background: rgba(0, 0, 0, 0.05);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .alarm-filter-btn.active {
+            background: #007aff;
+            color: white;
+        }
+        
+        .alarm-search-input {
+            margin-bottom: 1rem;
+        }
+        
+        .circular-hold-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 1rem 0;
+        }
+        
+        .circular-hold-btn {
+            position: relative;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            background: rgba(255, 59, 48, 0.95);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 1.2rem;
+            transition: transform 0.1s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .circular-hold-btn:active {
+            transform: scale(0.97);
+        }
+        
+        .circular-progress-ring {
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+            border-radius: 50%;
+            pointer-events: none;
         }
-        .terms-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
+        
+        .circular-progress-ring-circle {
+            transition: stroke-dashoffset 0.05s linear;
+            transform: rotate(-90deg);
+            transform-origin: 50% 50%;
         }
-        .close-terms {
-            float: right;
-            cursor: pointer;
-            font-size: 1.5em;
+        
+        .hold-time-text {
+            font-size: 1.8rem;
+            font-weight: bold;
+            z-index: 2;
         }
-        #termsText {
-            white-space: pre-line;
-            margin-top: 20px;
+        
+        .hold-label-text {
+            font-size: 0.7rem;
+            opacity: 0.8;
+            z-index: 2;
         }
-        .terms-link {
-            color: #3498db;
-            text-decoration: underline;
-            cursor: pointer;
+
+        .signature-canvas-container {
+            border: 2px dashed #007aff;
+            border-radius: 1rem;
+            background: #ffffff;
+            touch-action: none;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 140px;
+            border-radius: 1rem;
+            cursor: crosshair;
         }
     </style>
 </head>
 <body>
-    <!-- Modal für Teilnahmebedingungen -->
-    <div id="termsModal" class="terms-modal">
-        <div class="terms-content">
-            <span class="close-terms">&times;</span>
-            <h2>Teilnahmebedingungen</h2>
-            <div id="termsText"></div>
+    <div id="app-container" class="glass-card w-full max-w-4xl mx-auto p-5 transition-all duration-300">
+        
+        <!-- Login Screen -->
+        <div id="login-screen" class="space-y-4">
+            <div class="flex flex-col items-center mb-4">
+                <img src="https://raw.githubusercontent.com/DittmarJ/anmeldesystem_update2/81a13401c99e7f3f1d729472a6ca3d21ef9ad3c8/tuttikiesi-logo-2.png" 
+                     alt="Tuttikiesi Logo"
+                     class="h-20 object-contain">
+            </div>
+            <h1 class="text-3xl font-bold text-center text-[#1d1d1f] mb-2">Anmeldesystem Ferienprogramm</h1>
+            <p class="text-center text-[#6c6c70] mb-6">Bitte geben Sie den Zugangscode ein.</p>
+            <div class="max-w-md mx-auto">
+                <div class="glass-panel p-4 text-center text-2xl font-semibold tracking-wider text-[#1d1d1f] mb-6 rounded-button">
+                    <span id="code-display"></span><span id="cursor" class="animate-pulse">|</span>
+                </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <button class="keypad-button" data-value="1">1</button>
+                    <button class="keypad-button" data-value="2">2</button>
+                    <button class="keypad-button" data-value="3">3</button>
+                    <button class="keypad-button" data-value="4">4</button>
+                    <button class="keypad-button" data-value="5">5</button>
+                    <button class="keypad-button" data-value="6">6</button>
+                    <button class="keypad-button" data-value="7">7</button>
+                    <button class="keypad-button" data-value="8">8</button>
+                    <button class="keypad-button" data-value="9">9</button>
+                    <button class="keypad-button glass-button-danger" data-action="clear">⌫</button>
+                    <button class="keypad-button" data-value="0">0</button>
+                    <button class="keypad-button glass-button-success" data-action="enter">✓</button>
+                </div>
+                <div id="message-box" class="mt-4 p-3 bg-red-500/20 border border-red-500/30 text-[#ff3b30] rounded-2xl hidden text-center"></div>
+            </div>
         </div>
-    </div>
 
-    <div class="logo">
-        <h1>Tutti Kiesi Ferienprogramm</h1>
-    </div>
-
-    <div class="form-container">
-        <h2>Tagesanmeldung</h2>
-        <p>Bitte füllen Sie dieses Formular aus, um Ihr Kind für den Tag anzumelden.</p>
-
-        <form id="registrationForm">
-            <div class="form-group">
-                <label>Datum</label>
-                <div class="current-date" id="currentDate"></div>
-                <input type="hidden" id="date" name="date">
+        <!-- Main Content Screen (Betreuer) -->
+        <div id="main-content-screen" class="space-y-5 hidden">
+            <div class="flex flex-col items-center">
+                <img src="https://raw.githubusercontent.com/DittmarJ/anmeldesystem_update2/81a13401c99e7f3f1d729472a6ca3d21ef9ad3c8/tuttikiesi-logo-2.png" 
+                     alt="Tuttikiesi Logo"
+                     class="h-16 object-contain">
             </div>
-
-            <div class="form-group">
-                <label for="lastName" class="required">Nachname</label>
-                <input type="text" id="lastName" name="lastName" required>
-                <div id="lastNameError" class="error"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="firstName" class="required">Vorname</label>
-                <input type="text" id="firstName" name="firstName" required>
-                <div id="firstNameError" class="error"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="street" class="required">Straße und Hausnummer</label>
-                <input type="text" id="street" name="street" required>
-                <div id="streetError" class="error"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="city" class="required">Ort</label>
-                <input type="text" id="city" name="city" required>
-                <div id="cityError" class="error"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="phone" class="required">Telefonnummer</label>
-                <input type="tel" id="phone" name="phone" required>
-                <div id="phoneError" class="error"></div>
-            </div>
-
-            <div class="checkbox-group">
-                <div class="checkbox-label">
-                    <input type="checkbox" id="dayFee" name="dayFee" value="10">
-                    <label for="dayFee">Tagesgebühr von 10€</label>
-                </div>
-
-                <div class="checkbox-label">
-                    <input type="checkbox" id="lunch" name="lunch" value="6">
-                    <label for="lunch">Mittagessen von 6€</label>
-                </div>
-
-                <div class="checkbox-label">
-                    <input type="checkbox" id="aloneHome" name="aloneHome">
-                    <label for="aloneHome">Mein Kind darf alleine nach Hause gehen</label>
-                </div>
-
-                <div class="checkbox-label">
-                    <input type="checkbox" id="terms" name="terms" required>
-                    <label for="terms" class="required">Ich habe die <span class="terms-link">Teilnahmebedingungen</span> gelesen und bin einverstanden</label>
-                    <div id="termsError" class="error"></div>
-                </div>
-            </div>
-
-            <div class="signature-container">
-                <label for="signatureText" class="required">Unterschrift (Name eingeben)</label>
-                <input type="text" id="signatureText" name="signatureText" required placeholder="Vorname Nachname">
-                <div id="signatureError" class="error"></div>
-            </div>
-
-            <button type="submit" class="submit-btn">Anmeldung abschicken</button>
-        </form>
-    </div>
-
-    <div class="admin-section">
-        <h2>Admin-Bereich</h2>
-        <div class="form-group">
-            <label for="adminEmail">E-Mail:</label>
-            <input type="email" id="adminEmail" placeholder="admin@example.com">
-            <label for="adminPassword">Passwort:</label>
-            <input type="password" id="adminPassword">
-            <button id="loginBtn">Login</button>
+            <h2 class="text-2xl font-bold text-center text-[#1d1d1f]">Ferienprogramm An- und Abmeldung</h2>
+            <p class="text-center text-[#6c6c70]">
+                Willkommen, <span id="betreuer-name-display" class="font-semibold text-[#007aff]"></span>! – 
+                <a href="#" id="instructions-link" class="text-[#007aff] hover:underline">Hilfe und Anleitung</a>
+                <span id="alarm-link-container" class="hidden"> | <a href="#" id="alarm-panel-link" class="text-[#007aff] hover:underline">Räumungsalarm</a></span>
+            </p>
+            <div id="action-feedback-message" class="fixed top-0 left-0 w-full text-white text-center py-3 transform -translate-y-full transition-all duration-500 z-50 shadow-lg rounded-button" style="background: rgba(52,199,89,0.95); backdrop-filter: blur(8px);"></div>
+            <button id="logout-button-main" class="glass-button w-full py-3 mt-4 rounded-button">
+                Abmelden
+            </button>
         </div>
-        <div id="exportControls">
-            <button id="exportExcelBtn" class="admin-btn export">Als Excel exportieren</button>
-            <button id="resetDataBtn" class="admin-btn">Daten zurücksetzen (für neuen Tag)</button>
-            <div id="exportStatus"></div>
+
+        <!-- Instructions Screen -->
+        <div id="instructions-screen" class="hidden glass-panel p-5 max-w-md mx-auto">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-[#1d1d1f]">Anleitung</h3>
+                <button id="close-instructions" class="text-[#8e8e93] hover:text-[#1d1d1f] text-2xl leading-none">&times;</button>
+            </div>
+            <div class="space-y-3 text-[#6c6c70]">
+                <p>Nach links wischen, um den Anmelde- oder Abmelde-Button zu sehen.</p>
+                <p>Zum An- oder Abmelden auf den Button tippen.</p>
+                <p>Über den Info-Button können Details eingesehen, Kommentare hinzugefügt und Abholberechtigungen inkl. Unterschrift verwaltet werden.</p>
+                <p>Bei vorhandenen Kommentaren erscheint ein C vor dem Info-Button.</p>
+                <p>Bei einer hinterlegten Abholberechtigung erscheint ein Stiftsymbol (✍️).</p>
+                <p>Alle Änderungen werden automatisch gespeichert.</p>
+                <p>Bei einem Räumungsalarm muss der rote Kreis 5 Sekunden gedrückt werden.</p>
+                <p>Nach dem Auslösen öffnet sich automatisch die Anwesenheitskontrolle für alle.</p>
+            </div>
         </div>
-    </div>
 
-    <!-- Bibliotheken -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
-    <script src="https://cdn.sheetjs.com/xlsx-0.19.3/package/dist/xlsx.full.min.js"></script>
+        <!-- Alarm Confirmation Modal -->
+        <div id="alarm-confirm-modal" class="fixed inset-0 modal-glass flex items-center justify-center hidden z-50">
+            <div class="modal-content p-6 w-full max-w-sm mx-4">
+                <h3 class="text-xl font-bold text-[#1d1d1f] mb-3 text-center">🚨 Räumungsalarm</h3>
+                <p class="text-center text-[#6c6c70] mb-4">Halten Sie den roten Kreis 5 Sekunden gedrückt, um den Alarm auszulösen.</p>
+                <div class="circular-hold-container">
+                    <button id="circular-hold-btn" class="circular-hold-btn">
+                        <svg class="circular-progress-ring" width="150" height="150" viewBox="0 0 150 150">
+                            <circle class="circular-progress-ring-circle" cx="75" cy="75" r="70" fill="none" stroke="rgba(255,255,255,0.5)" stroke-width="6" stroke-dasharray="439.82" stroke-dashoffset="0"/>
+                        </svg>
+                        <span id="hold-time-display" class="hold-time-text">0</span>
+                        <span class="hold-label-text">Sekunden</span>
+                    </button>
+                </div>
+                <button id="cancel-alarm-confirm" class="glass-button w-full mt-4 py-2 rounded-button">Abbrechen</button>
+            </div>
+        </div>
 
-    <script>
-        // Firebase-Konfiguration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBfb0SUjFe_qYl_zqZaZ6YXVpaQC8H07AY",
-            authDomain: "ferienprogramm-checkin.firebaseapp.com",
-            projectId: "ferienprogramm-checkin",
-            storageBucket: "ferienprogramm-checkin.appspot.com",
-            messagingSenderId: "291165323970",
-            appId: "1:291165323970:web:866273f83491fec528f15b",
-            measurementId: "G-ZNHMPCGKNF"
-        };
+        <!-- Alarm Modal -->
+        <div id="alarm-modal" class="fixed inset-0 modal-glass flex items-center justify-center hidden z-50">
+            <div class="modal-content p-5 w-full max-w-2xl mx-4 max-h-[85vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-[#1d1d1f]">🚨 Räumungsalarm - Anwesenheitskontrolle</h2>
+                    <button id="close-alarm-modal" class="text-[#8e8e93] hover:text-[#1d1d1f] text-2xl leading-none">&times;</button>
+                </div>
+                
+                <div class="alarm-stats">
+                    <div class="grid grid-cols-3 gap-3">
+                        <div id="stat-signedin" class="stat-card">
+                            <div class="stat-number" id="stat-signedin-count">0</div>
+                            <div class="stat-label">Angemeldet (sollten da sein)</div>
+                        </div>
+                        <div id="stat-present" class="stat-card">
+                            <div class="stat-number" id="stat-present-count">0</div>
+                            <div class="stat-label">Anwesend (gezählt)</div>
+                        </div>
+                        <div id="stat-missing" class="stat-card">
+                            <div class="stat-number" id="stat-missing-count">0</div>
+                            <div class="stat-label">Fehlen noch</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <input type="text" id="alarm-search-input" placeholder="Teilnehmer suchen..." class="glass-input w-full p-2 rounded-button alarm-search-input">
+                
+                <div class="alarm-filter-buttons">
+                    <button data-filter="all" class="alarm-filter-btn active">Alle</button>
+                    <button data-filter="present" class="alarm-filter-btn">Anwesend</button>
+                    <button data-filter="missing" class="alarm-filter-btn">Fehlen noch</button>
+                </div>
+                
+                <div id="alarm-participant-list" class="space-y-2 max-h-96 overflow-y-auto"></div>
+                
+                <div id="alarm-reset-container" class="hidden mt-4">
+                    <button id="reset-alarm-button" class="glass-button-danger w-full py-2 rounded-button">Alarm zurücksetzen (alle Anwesenheitsmarkierungen entfernen)</button>
+                </div>
+                
+                <button id="close-alarm-modal-bottom" class="glass-button w-full mt-4 py-2 rounded-button">Schließen</button>
+            </div>
+        </div>
 
-        // Firebase initialisieren
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+        <!-- Admin Overlay für Betreuungsleitung -->
+        <div id="admin-overlay" class="admin-overlay hidden z-50">
+            <div class="admin-overlay-content w-full max-w-2xl">
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-bold text-[#1d1d1f]">Teilnehmerverwaltung</h2>
+                    <button id="close-admin-overlay" class="text-[#8e8e93] hover:text-[#1d1d1f] text-2xl leading-none">&times;</button>
+                </div>
+                <div id="admin-overlay-content"></div>
+            </div>
+        </div>
 
-        // Teilnahmebedingungen Text
-        const termsText = `Teilnahmebedingungen der offenen Ferienbetreuung 
-im Spiel- und Kulturhaus Tutti Kiesi
+        <!-- Admin Content Screen -->
+        <div id="admin-content-screen" class="space-y-5 hidden">
+            <div class="flex flex-col items-center">
+                <img src="https://raw.githubusercontent.com/DittmarJ/anmeldesystem_update2/81a13401c99e7f3f1d729472a6ca3d21ef9ad3c8/tuttikiesi-logo-2.png" 
+                     alt="Tuttikiesi Logo"
+                     class="h-16 object-contain">
+            </div>
+            <h2 class="text-2xl font-bold text-center text-[#1d1d1f]">Admin-Bereich</h2>
+            <p class="text-center text-[#6c6c70] mb-8">Willkommen im Admin-Bereich. Hier können Sie Einstellungen vornehmen.</p>
+            <div class="flex flex-col space-y-2" id="admin-nav-container">
+                <button id="nav-user-management" class="admin-nav-button rounded-button">Benutzerverwaltung</button>
+                <button id="nav-participant-management" class="admin-nav-button rounded-button">Teilnehmerverwaltung</button>
+                <button id="nav-participant-overview" class="admin-nav-button rounded-button">Teilnehmerübersicht</button>
+                <button id="nav-alarm" class="admin-nav-button rounded-button">Räumungsalarm</button>
+                <button id="nav-program-settings" class="admin-nav-button rounded-button">Programmeinstellungen</button>
+            </div>
+            <div id="admin-section-wrapper" class="hidden">
+                <p id="admin-welcome-message" class="text-center text-[#6c6c70] mb-4">Bitte wählen Sie eine Option oben.</p>
+                
+                <div id="user-management-section" class="glass-panel p-4 hidden">
+                    <h3 class="text-lg font-semibold text-[#1d1d1f] mb-4">Benutzerverwaltung</h3>
+                    <div class="mb-5 border-b pb-4">
+                        <h4 class="text-md font-medium text-[#1d1d1f] mb-3">Neuen Benutzer hinzufügen</h4>
+                        <input type="text" id="new-username" placeholder="Benutzername" class="glass-input w-full p-2 mb-2 rounded-button">
+                        <input type="text" id="new-user-code" placeholder="Zugangscode (z.B. 1234)" class="glass-input w-full p-2 mb-2 rounded-button">
+                        <select id="new-user-status" class="w-full p-2 mb-3 rounded-button">
+                            <option value="Betreuer">Betreuer</option>
+                            <option value="Betreuungsleitung">Betreuungsleitung</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                        <button id="add-user-button" class="glass-button-primary w-full py-2 rounded-button">Benutzer hinzufügen</button>
+                        <div id="add-user-message" class="mt-2 text-sm text-center hidden"></div>
+                    </div>
+                    <div>
+                        <h4 class="text-md font-medium text-[#1d1d1f] mb-3">Aktuelle Benutzer</h4>
+                        <ul id="user-list" class="space-y-2"></ul>
+                    </div>
+                </div>
 
-Allgemeines:
-1. Das Betreuungsangebot ist für Kinder ab 6 Jahren
-2. Die Betreuungszeiten sind von 8.00 bis 16.00 Uhr
+                <div id="participant-management-section" class="glass-panel p-4 hidden">
+                    <h3 class="text-lg font-semibold text-[#1d1d1f] mb-4">Teilnehmerverwaltung</h3>
+                    <div class="mb-5 border-b pb-4">
+                        <h4 class="text-md font-medium text-[#1d1d1f] mb-3">Neuen Teilnehmer manuell hinzufügen</h4>
+                        
+                        <div class="mb-3">
+                            <label class="block text-xs font-bold text-[#6c6c70] uppercase mb-1">Anmeldungstyp</label>
+                            <select id="new-participant-regtype" class="w-full rounded-button">
+                                <option value="Tagesanmeldung" selected>Tagesanmeldung</option>
+                                <option value="Wochenanmeldung">Wochenanmeldung</option>
+                            </select>
+                        </div>
 
-An-Abmeldung:
-1. Die Anmeldung zur Tagesbetreuung erfolgt täglich schriftlich
-2. Die Abmeldung erfolgt sowohl mündlich beim Betreuungspersonal als auch schriftlich an der Abmeldestation
+                        <div class="mb-3">
+                            <label class="flex items-center space-x-2 cursor-pointer">
+                                <input type="checkbox" id="no-data-checkbox" class="h-4 w-4 rounded">
+                                <span class="text-sm text-[#1d1d1f]">Keine persönlichen Daten hinterlegt</span>
+                            </label>
+                            <p class="text-xs text-[#8e8e93] mt-1 ml-6">Aktivieren, wenn keine Daten vorliegen</p>
+                        </div>
 
-Abholung:
-Die Abholzeit ist über den gesamten Betreuungszeitraum möglich
+                        <div class="space-y-3 mb-4">
+                            <div class="p-3 rounded-2xl border border-[rgba(0,0,0,0.1)]">
+                                <p class="text-xs font-bold text-[#007aff] mb-2">Kind 1</p>
+                                <input type="text" id="child1-first-name" placeholder="Vorname" class="glass-input w-full p-2 mb-2 rounded-button">
+                                <input type="text" id="child1-last-name" placeholder="Nachname" class="glass-input w-full p-2 mb-2 rounded-button">
+                            </div>
+                            <div id="child2-container" class="p-3 rounded-2xl border border-[rgba(0,0,0,0.1)] hidden">
+                                <p class="text-xs font-bold text-[#007aff] mb-2">Kind 2</p>
+                                <input type="text" id="child2-first-name" placeholder="Vorname" class="glass-input w-full p-2 mb-2 rounded-button">
+                                <input type="text" id="child2-last-name" placeholder="Nachname" class="glass-input w-full p-2 mb-2 rounded-button">
+                            </div>
+                            <div id="child3-container" class="p-3 rounded-2xl border border-[rgba(0,0,0,0.1)] hidden">
+                                <p class="text-xs font-bold text-[#007aff] mb-2">Kind 3</p>
+                                <input type="text" id="child3-first-name" placeholder="Vorname" class="glass-input w-full p-2 mb-2 rounded-button">
+                                <input type="text" id="child3-last-name" placeholder="Nachname" class="glass-input w-full p-2 mb-2 rounded-button">
+                            </div>
+                            <button type="button" id="add-sibling-row-button" class="text-[#007aff] text-sm font-bold flex items-center hover:text-[#0051d5] transition rounded-button px-3 py-2 bg-white/50">
+                                <span class="mr-1 text-lg">+</span> Geschwisterkind hinzufügen
+                            </button>
+                        </div>
 
-Aufsicht:
-Die Aufsichtspflicht beginnt, sobald das Kind nach Beginn der Öffnungszeiten an der Anmeldung registriert ist und endet mit dem Verlassen des Betreuungsangebotes, spätestens jedoch nach Betreuungsende. Beim Verlassen des Betreuungsangebotes erfolgt die Abmeldung des Kindes sowohl mündlich beim Betreuungspersonal als auch schriftlich an der Abmeldestation. Bitte stellen Sie sicher, dass die Abholsituation geklärt und Ihrem Kind bekannt ist.
+                        <div class="space-y-2 mb-3 pt-3 border-t">
+                            <p class="text-sm font-bold text-[#1d1d1f] mb-1">Adresse (optional):</p>
+                            <input type="text" id="new-participant-street" placeholder="Straße" class="glass-input w-full p-2 rounded-button">
+                            <input type="text" id="new-participant-city" placeholder="Ort" class="glass-input w-full p-2 rounded-button">
+                            <input type="text" id="new-participant-phone" placeholder="Telefon" class="glass-input w-full p-2 rounded-button">
+                        </div>
 
-Meldepflicht:
-Allergien und Unverträglichkeiten, die im Betreuungsalltag relevant sind, müssen dem Betreuungspersonal vor Betreuungsantritt mitgeteilt werden. Ebenso verhält es sich beim besonderen Betreuungs-bzw. Förderbedarf des Kindes.
+                        <div class="space-y-2 mb-4">
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" id="new-participant-can-go-home-alone" class="h-4 w-4 rounded" checked>
+                                <span class="text-sm text-[#1d1d1f]">Darf alleine nach Hause</span>
+                            </label>
+                            <label class="flex items-center space-x-2">
+                                <input type="checkbox" id="new-participant-paid" class="h-4 w-4 rounded" checked>
+                                <span class="text-sm text-[#1d1d1f]">Bezahlt</span>
+                            </label>
+                        </div>
 
-Anspruch auf Betreuungsplatz:
-Sind alle Betreuungsplätze belegt, besteht kein Anspruch auf eine Tagesplatz
+                        <div class="flex space-x-2">
+                            <button id="add-participant-manual-button" class="glass-button-primary w-1/2 py-2 rounded-button">Hinzufügen</button>
+                            <button id="add-and-signin-participant-button" class="glass-button-success w-1/2 py-2 rounded-button">Hinzufügen und Anmelden</button>
+                        </div>
+                        <div id="add-participant-manual-message" class="mt-2 text-sm text-center hidden"></div>
+                    </div>
 
-Haftung:
-Die Haftung des Veranstalters, gleich aus welchem Rechtsgrund, ist auf Fahrlässigkeit oder Vorsatz beschränkt. Für Unfälle während der Veranstaltung, auf dem Weg zur und von der Veranstaltungsstätte sowie für Diebstahl und den Verlust oder Beschädigungen der Gegenstände übernimmt der Veranstalter keine Haftung.
+                    <div id="excel-import-container">
+                        <h4 class="text-md font-medium text-[#1d1d1f] mb-3">Excel-Import</h4>
+                        <input type="file" id="import-participants-file-input" accept=".xlsx,.xls" class="glass-input w-full p-2 mb-2 rounded-button">
+                        <button id="import-participants-button" class="glass-button w-full py-2 rounded-button">Excel importieren</button>
+                        <div id="import-participants-message" class="mt-2 text-sm text-center hidden"></div>
+                    </div>
+                </div>
 
-Ausschluss vom Ferienprogramm:
-Kinder, die trotz wiederholter Ermahnung durch auffälliges Verhalten den Gesamtbetrieb stören, sich oder andere Kinder gefährden, unerlaubt das Angebot verlassen oder sonstige schwerwiegende Gründe im Verhalten bestehen, können vom Betreuungsangebot ausgeschlossen werden.`;
+                <div id="admin-participant-overview-section" class="glass-panel p-4 hidden">
+                    <h3 class="text-lg font-semibold text-[#1d1d1f] mb-4">Teilnehmerübersicht</h3>
+                    <p class="text-[#6c6c70] mb-3">Hier sehen Sie alle Teilnehmer und ihren aktuellen Status.</p>
+                </div>
 
-        document.addEventListener('DOMContentLoaded', function() {
-            // Aktuelles Datum anzeigen
-            const today = new Date();
-            const formattedDate = today.toLocaleDateString('de-DE', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            document.getElementById('currentDate').textContent = formattedDate;
-            document.getElementById('date').value = today.toISOString().split('T')[0];
-            
-            // Teilnahmebedingungen Modal
-            const termsModal = document.getElementById('termsModal');
-            const termsTextElement = document.getElementById('termsText');
-            const termsLinks = document.querySelectorAll('.terms-link');
-            const closeTerms = document.getElementsByClassName('close-terms')[0];
+                <div id="program-settings-section" class="glass-panel p-4 hidden">
+                    <h3 class="text-lg font-semibold text-[#1d1d1f] mb-4">Programmeinstellungen</h3>
+                    <label class="flex items-center space-x-2 mb-4">
+                        <input type="checkbox" id="control-mode-toggle" class="h-4 w-4 rounded">
+                        <span class="text-sm text-[#1d1d1f]">Kontrollmodus aktivieren (unbezahlte Teilnehmer rot markieren)</span>
+                    </label>
+                    <div class="space-y-2 mb-4 border-t pt-4">
+                        <h4 class="text-md font-medium text-[#1d1d1f] mb-2">Sicherung</h4>
+                        <button id="create-backup-button" class="glass-button w-full py-2 rounded-button">Sicherung erstellen</button>
+                        <input type="file" id="load-backup-input" accept=".json" class="hidden">
+                        <button id="load-backup-button" class="glass-button w-full py-2 rounded-button">Sicherung laden</button>
+                    </div>
+                    <div class="space-y-2 pt-2">
+                        <h4 class="text-md font-medium text-[#1d1d1f] mb-2">Datenverwaltung</h4>
+                        <button id="remove-all-participants-button" class="glass-button-danger w-full py-2 rounded-button">Alle Teilnehmer löschen</button>
+                        <button id="remove-daily-participants-button" class="glass-button w-full py-2 rounded-button">Tagesanmeldungen löschen</button>
+                        <button id="reset-all-participants-button" class="glass-button w-full py-2 rounded-button">Status zurücksetzen</button>
+                    </div>
+                </div>
+            </div>
+            <button id="logout-button-admin" class="glass-button w-full py-3 mt-3 rounded-button">Abmelden</button>
+        </div>
 
-            termsTextElement.textContent = termsText;
-            
-            termsLinks.forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    termsModal.style.display = 'flex';
+        <!-- Unified Participant List Container -->
+        <div id="unified-participant-container" class="min-h-[200px] space-y-3 mt-4 hidden">
+            <div class="space-y-2 mb-3">
+                <input type="text" id="participant-search-input" placeholder="Teilnehmer suchen..." class="glass-input w-full p-2 rounded-button">
+                <div class="flex items-center space-x-2">
+                    <select id="sort-select" class="sort-select flex-1">
+                        <option value="firstNameAsc">Sortieren: Vorname A-Z</option>
+                        <option value="firstNameDesc">Sortieren: Vorname Z-A</option>
+                        <option value="lastNameAsc">Sortieren: Nachname A-Z</option>
+                        <option value="lastNameDesc">Sortieren: Nachname Z-A</option>
+                        <option value="status">Sortieren: Status (angemeldet zuerst)</option>
+                    </select>
+                    <button id="reset-filters-button" class="glass-button px-3 py-2 rounded-button">Zurücksetzen</button>
+                </div>
+            </div>
+            <p class="text-sm text-[#6c6c70] mb-2">Angemeldete Teilnehmer: <span id="participant-count" class="font-semibold text-[#34c759]">0</span></p>
+            <ul id="unified-participant-list" class="space-y-2"></ul>
+            <p id="no-participants-message-unified" class="text-center text-[#8e8e93] text-sm mt-4 hidden">Noch keine Teilnehmer vorhanden.</p>
+        </div>
+
+        <!-- Modals -->
+        <div id="family-modal" class="fixed inset-0 modal-glass flex items-center justify-center hidden z-50">
+            <div class="modal-content p-5 w-full max-w-md mx-4 max-h-[80vh] overflow-y-auto">
+                <h3 id="family-modal-title" class="text-xl font-bold text-[#1d1d1f] mb-3">Familienmitglieder auswählen</h3>
+                <p id="family-modal-message" class="text-[#6c6c70] mb-4">Folgende Kinder haben den gleichen Nachnamen. Bitte wählen Sie aus, welche Sie an- oder abmelden möchten:</p>
+                <div id="family-members-list" class="space-y-2 mb-4 max-h-60 overflow-y-auto"></div>
+                <div class="flex justify-end space-x-3">
+                    <button id="cancel-family-modal" class="glass-button px-4 py-2 rounded-button">Abbrechen</button>
+                    <button id="confirm-family-action" class="glass-button-primary px-4 py-2 rounded-button">Ausgewählte bearbeiten</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="pickup-family-modal" class="fixed inset-0 modal-glass flex items-center justify-center hidden z-50">
+            <div class="modal-content p-5 w-full max-w-md mx-4">
+                <h3 class="text-xl font-bold text-[#1d1d1f] mb-3">Abholperson festlegen</h3>
+                <div id="pickup-family-list" class="mb-4"></div>
+                <div class="flex justify-end space-x-3">
+                    <button id="cancel-pickup-family" class="glass-button px-4 py-2 rounded-button">Abbrechen</button>
+                    <button id="confirm-pickup-family" class="glass-button-primary px-4 py-2 rounded-button">Bestätigen</button>
+                </div>
+                <div id="pickup-family-message" class="mt-3 text-sm text-center hidden text-[#ff3b30]"></div>
+            </div>
+        </div>
+
+        <div id="delete-modal" class="fixed inset-0 modal-glass flex items-center justify-center hidden z-50">
+            <div class="modal-content p-6 w-full max-w-sm mx-4">
+                <h3 id="delete-modal-title" class="text-xl font-bold text-[#1d1d1f] mb-3">Bestätigung</h3>
+                <p id="delete-modal-message" class="mb-5 text-[#6c6c70]"></p>
+                <div class="flex justify-end space-x-3">
+                    <button id="cancel-delete" class="glass-button px-4 py-2 rounded-button">Abbrechen</button>
+                    <button id="confirm-delete" class="glass-button-primary px-4 py-2 rounded-button">Bestätigen</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="participant-details-modal" class="fixed inset-0 modal-glass flex items-center justify-center hidden z-50">
+            <div class="modal-content p-5 w-full max-w-md mx-4 max-h-[85vh] overflow-y-auto">
+                <h3 id="details-modal-title" class="text-xl font-bold text-[#1d1d1f] mb-4">Teilnehmerdetails</h3>
+                <div class="space-y-3 text-[#1d1d1f]">
+                    <div><strong>Vorname:</strong> <span id="details-first-name-display"></span><input type="text" id="details-first-name-input" class="glass-input w-full mt-1 hidden rounded-button"></div>
+                    <div><strong>Nachname:</strong> <span id="details-last-name-display"></span><input type="text" id="details-last-name-input" class="glass-input w-full mt-1 hidden rounded-button"></div>
+                    <div><strong>Straße:</strong> <span id="details-street-display"></span><input type="text" id="details-street-input" class="glass-input w-full mt-1 hidden rounded-button"></div>
+                    <div><strong>Ort:</strong> <span id="details-city-display"></span><input type="text" id="details-city-input" class="glass-input w-full mt-1 hidden rounded-button"></div>
+                    <div><strong>Telefon:</strong> <span id="details-phone-display"></span><input type="text" id="details-phone-input" class="glass-input w-full mt-1 hidden rounded-button"></div>
+                    <div><strong>Anmeldungstyp:</strong> <span id="details-regtype-display"></span><select id="details-regtype-select" class="w-full mt-1 hidden rounded-button"><option value="Tagesanmeldung">Tagesanmeldung</option><option value="Wochenanmeldung">Wochenanmeldung</option></select></div>
+                    <div class="flex items-center"><strong>Bezahlt:</strong> <span id="details-paid-display" class="ml-2"></span><input type="checkbox" id="details-paid-input" class="ml-2 hidden rounded-button"></div>
+                    <div class="flex items-center"><strong>Darf alleine:</strong> <span id="details-can-go-home-alone-display" class="ml-2"></span><input type="checkbox" id="details-can-go-home-alone-input" class="ml-2 hidden rounded-button"></div>
+                    <div><strong>Keine Daten:</strong> <span id="details-no-data-display"></span><input type="checkbox" id="details-no-data-input" class="ml-2 hidden rounded-button"></div>
+                    
+                    <div id="no-data-warning-detail" class="no-data-warning-detail hidden">
+                        Keine persönlichen Daten hinterlegt. Bitte wenden Sie sich an einen Vorgesetzten.
+                    </div>
+                    
+                    <div id="details-picked-up-by-row" class="hidden"><strong>Abgeholt von:</strong> <span id="details-picked-up-by"></span></div>
+                </div>
+
+                <!-- ERGÄNZUNG: BEREICH ABHOLBERECHTIGUNG & UNTERSCHRIFT -->
+                <div class="mt-4 pt-3 border-t">
+                    <button type="button" id="toggle-auth-section-btn" class="glass-button w-full py-2 text-sm font-semibold text-[#007aff] rounded-button">
+                        ✍️ Abholberechtigung & Unterschrift verwalten
+                    </button>
+
+                    <div id="auth-section-container" class="hidden mt-3 p-3 bg-white/60 border rounded-2xl">
+                        <label class="block text-xs font-semibold text-[#1d1d1f] mb-1">Berechtigte Dritte Personen:</label>
+                        <input type="text" id="allowed-pickup-input" placeholder="Z.B. Oma Erna, Familie Müller" class="glass-input w-full text-sm p-2 mb-3 rounded-button">
+
+                        <label class="block text-xs font-semibold text-[#1d1d1f] mb-1">Unterschrift der Erziehungsberechtigten:</label>
+                        <div class="signature-canvas-container mb-2">
+                            <canvas id="signature-canvas"></canvas>
+                        </div>
+
+                        <div id="signature-preview-container" class="hidden mb-2">
+                            <p class="text-xs text-[#8e8e93] mb-1">Gespeicherte Unterschrift:</p>
+                            <img id="signature-image-preview" src="" alt="Unterschrift" class="h-16 border rounded-lg bg-white p-1">
+                        </div>
+
+                        <div class="flex flex-col gap-2">
+                            <div class="flex space-x-2">
+                                <button type="button" id="clear-signature-button" class="glass-button text-xs py-1 px-3 rounded-button">Löschen</button>
+                                <button type="button" id="save-signature-button" class="glass-button-primary text-xs py-1 px-3 rounded-button flex-1">Speichern</button>
+                            </div>
+                            <button type="button" id="download-pdf-button" class="glass-button-success text-xs py-2 px-3 rounded-button w-full font-bold">
+                                📄 Abholberechtigung als PDF herunterladen
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4 pt-3 border-t">
+                    <h4 class="font-bold text-[#1d1d1f] mb-2">Kommentare</h4>
+                    <div id="details-comments-list" class="space-y-1 mb-3 max-h-32 overflow-y-auto p-2 rounded-2xl bg-[rgba(0,0,0,0.03)]"></div>
+                    <textarea id="new-comment-text" class="glass-input w-full p-2 text-sm rounded-button" placeholder="Neuen Kommentar eingeben..."></textarea>
+                    <button id="add-comment-button" class="glass-button-success w-full mt-2 py-2 text-sm rounded-button">Kommentar hinzufügen</button>
+                </div>
+                
+                <div class="mt-4 pt-3 border-t">
+                    <h4 class="font-bold text-[#1d1d1f] mb-2">Aktivitäten</h4>
+                    <ul id="details-activity-history" class="space-y-1 text-sm max-h-32 overflow-y-auto"></ul>
+                </div>
+                
+                <div class="flex justify-end space-x-3 mt-5">
+                    <button id="save-details-button" class="glass-button-primary px-4 py-2 hidden rounded-button">Speichern</button>
+                    <button id="close-details-modal" class="glass-button px-4 py-2 rounded-button">Schließen</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="pickup-modal" class="fixed inset-0 modal-glass flex items-center justify-center hidden z-50">
+            <div class="modal-content p-5 w-full max-w-sm mx-4">
+                <h3 class="text-xl font-bold text-[#1d1d1f] mb-3">Teilnehmer abholen</h3>
+                <p class="mb-3 text-[#6c6c70]">Wer holt <span id="pickup-participant-name" class="font-semibold text-[#1d1d1f]"></span> ab?</p>
+                
+                <div id="allowed-pickup-notice" class="hidden p-2 mb-3 bg-green-100 border border-green-300 text-green-800 rounded-xl text-xs">
+                    <strong>Hinterlegte Abholberechtigung:</strong><br>
+                    <span id="allowed-pickup-notice-text"></span>
+                </div>
+
+                <select id="pickup-person-select" class="w-full p-2 mb-2 rounded-button">
+                    <option value="">Bitte wählen</option>
+                    <option value="Mutter">Mutter</option>
+                    <option value="Vater">Vater</option>
+                    <option value="Oma">Oma</option>
+                    <option value="Opa">Opa</option>
+                    <option value="Geschwister">Geschwister</option>
+                    <option value="Berechtigte Person">Berechtigte Person (lt. Unterschrift)</option>
+                    <option value="Sonstige">Sonstige</option>
+                </select>
+                <div id="custom-pickup-person-container" class="hidden mb-3">
+                    <input type="text" id="custom-pickup-person-input" placeholder="Name" class="glass-input w-full p-2 rounded-button">
+                </div>
+                <div class="flex justify-end space-x-3">
+                    <button id="cancel-pickup" class="glass-button px-4 py-2 rounded-button">Abbrechen</button>
+                    <button id="confirm-pickup" class="glass-button-primary px-4 py-2 rounded-button">Bestätigen</button>
+                </div>
+                <div id="pickup-message-box" class="mt-3 text-sm text-center hidden text-[#ff3b30]"></div>
+            </div>
+        </div>
+
+        <script>
+            // INDEXEDDB SPEICHER-LAYER
+            const DB_NAME = 'FerienprogrammAppDB';
+            const DB_VERSION = 2;
+            let db = null;
+
+            function initDB() {
+                return new Promise((resolve, reject) => {
+                    const request = indexedDB.open(DB_NAME, DB_VERSION);
+                    request.onupgradeneeded = (e) => {
+                        const dbInstance = e.target.result;
+                        if (!dbInstance.objectStoreNames.contains('users')) {
+                            dbInstance.createObjectStore('users', { keyPath: 'id' });
+                        }
+                        if (!dbInstance.objectStoreNames.contains('participants')) {
+                            dbInstance.createObjectStore('participants', { keyPath: 'id' });
+                        }
+                        if (!dbInstance.objectStoreNames.contains('settings')) {
+                            dbInstance.createObjectStore('settings', { keyPath: 'key' });
+                        }
+                    };
+                    request.onsuccess = (e) => { db = e.target.result; resolve(db); };
+                    request.onerror = (e) => reject(e.target.error);
                 });
-            });
+            }
 
-            closeTerms.addEventListener('click', function() {
-                termsModal.style.display = 'none';
-            });
+            function dbGetAll(storeName) {
+                return new Promise((resolve) => {
+                    if (!db) return resolve([]);
+                    const tx = db.transaction(storeName, 'readonly');
+                    const store = tx.objectStore(storeName);
+                    const req = store.getAll();
+                    req.onsuccess = () => resolve(req.result || []);
+                    req.onerror = () => resolve([]);
+                });
+            }
 
-            window.addEventListener('click', function(event) {
-                if (event.target == termsModal) {
-                    termsModal.style.display = 'none';
+            function dbSaveAll(storeName, items) {
+                return new Promise((resolve) => {
+                    if (!db) return resolve();
+                    const tx = db.transaction(storeName, 'readwrite');
+                    const store = tx.objectStore(storeName);
+                    store.clear().onsuccess = () => {
+                        items.forEach(item => store.put(item));
+                    };
+                    tx.oncomplete = () => resolve();
+                });
+            }
+
+            function dbGetSetting(key) {
+                return new Promise((resolve) => {
+                    if (!db) return resolve(null);
+                    const tx = db.transaction('settings', 'readonly');
+                    const store = tx.objectStore('settings');
+                    const req = store.get(key);
+                    req.onsuccess = () => resolve(req.result ? req.result.value : null);
+                    req.onerror = () => resolve(null);
+                });
+            }
+
+            function dbSaveSetting(key, value) {
+                return new Promise((resolve) => {
+                    if (!db) return resolve();
+                    const tx = db.transaction('settings', 'readwrite');
+                    const store = tx.objectStore('settings');
+                    store.put({ key, value });
+                    tx.oncomplete = () => resolve();
+                });
+            }
+
+            // DOM Elements
+            const loginScreen = document.getElementById('login-screen');
+            const mainContentScreen = document.getElementById('main-content-screen');
+            const adminContentScreen = document.getElementById('admin-content-screen');
+            const instructionsScreen = document.getElementById('instructions-screen');
+            const codeDisplay = document.getElementById('code-display');
+            const keypadButtons = document.querySelectorAll('.keypad-button');
+            const logoutButtonMain = document.getElementById('logout-button-main');
+            const logoutButtonAdmin = document.getElementById('logout-button-admin');
+            const messageBox = document.getElementById('message-box');
+            const betreuerNameDisplay = document.getElementById('betreuer-name-display');
+            const alarmLinkContainer = document.getElementById('alarm-link-container');
+            const alarmPanelLink = document.getElementById('alarm-panel-link');
+            const adminOverlay = document.getElementById('admin-overlay');
+            const closeAdminOverlay = document.getElementById('close-admin-overlay');
+            const adminOverlayContent = document.getElementById('admin-overlay-content');
+            
+            const alarmConfirmModal = document.getElementById('alarm-confirm-modal');
+            const circularHoldBtn = document.getElementById('circular-hold-btn');
+            const holdTimeDisplay = document.getElementById('hold-time-display');
+            const cancelAlarmConfirm = document.getElementById('cancel-alarm-confirm');
+            
+            const alarmModal = document.getElementById('alarm-modal');
+            const closeAlarmModal = document.getElementById('close-alarm-modal');
+            const closeAlarmModalBottom = document.getElementById('close-alarm-modal-bottom');
+            const alarmParticipantList = document.getElementById('alarm-participant-list');
+            const alarmSearchInput = document.getElementById('alarm-search-input');
+            const statSignedinCount = document.getElementById('stat-signedin-count');
+            const statPresentCount = document.getElementById('stat-present-count');
+            const statMissingCount = document.getElementById('stat-missing-count');
+            const statSignedinCard = document.getElementById('stat-signedin');
+            const statPresentCard = document.getElementById('stat-present');
+            const statMissingCard = document.getElementById('stat-missing');
+            const alarmResetContainer = document.getElementById('alarm-reset-container');
+            const resetAlarmButton = document.getElementById('reset-alarm-button');
+
+            const newUsernameInput = document.getElementById('new-username');
+            const newUserCodeInput = document.getElementById('new-user-code');
+            const newUserStatusSelect = document.getElementById('new-user-status');
+            const addUserButton = document.getElementById('add-user-button');
+            const addUserMessage = document.getElementById('add-user-message');
+            const userListElement = document.getElementById('user-list');
+
+            const unifiedParticipantContainer = document.getElementById('unified-participant-container');
+            const unifiedParticipantList = document.getElementById('unified-participant-list');
+            const noParticipantsMessageUnified = document.getElementById('no-participants-message-unified');
+
+            const actionFeedbackMessage = document.getElementById('action-feedback-message');
+            const participantSearchInput = document.getElementById('participant-search-input');
+            const sortSelect = document.getElementById('sort-select');
+            const resetFiltersButton = document.getElementById('reset-filters-button');
+
+            const deleteModal = document.getElementById('delete-modal');
+            const deleteModalTitle = document.getElementById('delete-modal-title');
+            const deleteModalMessage = document.getElementById('delete-modal-message');
+            const cancelDeleteButton = document.getElementById('cancel-delete');
+            const confirmDeleteButton = document.getElementById('confirm-delete');
+
+            const participantDetailsModal = document.getElementById('participant-details-modal');
+            const detailsModalTitle = document.getElementById('details-modal-title');
+            const detailsFirstNameDisplay = document.getElementById('details-first-name-display');
+            const detailsLastNameDisplay = document.getElementById('details-last-name-display');
+            const detailsStreetDisplay = document.getElementById('details-street-display');
+            const detailsCityDisplay = document.getElementById('details-city-display');
+            const detailsPhoneDisplay = document.getElementById('details-phone-display');
+            const detailsRegtypeDisplay = document.getElementById('details-regtype-display');
+            const detailsPaidDisplay = document.getElementById('details-paid-display');
+            const detailsCanGoHomeAloneDisplay = document.getElementById('details-can-go-home-alone-display');
+            const detailsNoDataDisplay = document.getElementById('details-no-data-display');
+            const detailsFirstNameInput = document.getElementById('details-first-name-input');
+            const detailsLastNameInput = document.getElementById('details-last-name-input');
+            const detailsStreetInput = document.getElementById('details-street-input');
+            const detailsCityInput = document.getElementById('details-city-input');
+            const detailsPhoneInput = document.getElementById('details-phone-input');
+            const detailsRegtypeSelect = document.getElementById('details-regtype-select');
+            const detailsPaidInput = document.getElementById('details-paid-input');
+            const detailsCanGoHomeAloneInput = document.getElementById('details-can-go-home-alone-input');
+            const detailsNoDataInput = document.getElementById('details-no-data-input');
+            const detailsPickedUpBy = document.getElementById('details-picked-up-by');
+            const detailsPickedUpByRow = document.getElementById('details-picked-up-by-row');
+            const closeDetailsModalButton = document.getElementById('close-details-modal');
+            const saveDetailsButton = document.getElementById('save-details-button');
+            const detailsActivityHistory = document.getElementById('details-activity-history');
+            const detailsCommentsList = document.getElementById('details-comments-list');
+            const newCommentText = document.getElementById('new-comment-text');
+            const addCommentButton = document.getElementById('add-comment-button');
+            const noDataWarningDetail = document.getElementById('no-data-warning-detail');
+
+            // Ergänzende Canvas & Unterschrift Elements
+            const toggleAuthSectionBtn = document.getElementById('toggle-auth-section-btn');
+            const authSectionContainer = document.getElementById('auth-section-container');
+            const allowedPickupInput = document.getElementById('allowed-pickup-input');
+            const signatureCanvas = document.getElementById('signature-canvas');
+            const saveSignatureButton = document.getElementById('save-signature-button');
+            const clearSignatureButton = document.getElementById('clear-signature-button');
+            const downloadPdfButton = document.getElementById('download-pdf-button');
+            const signaturePreviewContainer = document.getElementById('signature-preview-container');
+            const signatureImagePreview = document.getElementById('signature-image-preview');
+
+            const pickupModal = document.getElementById('pickup-modal');
+            const pickupParticipantName = document.getElementById('pickup-participant-name');
+            const pickupPersonSelect = document.getElementById('pickup-person-select');
+            const customPickupPersonContainer = document.getElementById('custom-pickup-person-container');
+            const customPickupPersonInput = document.getElementById('custom-pickup-person-input');
+            const allowedPickupNotice = document.getElementById('allowed-pickup-notice');
+            const allowedPickupNoticeText = document.getElementById('allowed-pickup-notice-text');
+            const cancelPickupButton = document.getElementById('cancel-pickup');
+            const confirmPickupButton = document.getElementById('confirm-pickup');
+            const pickupMessageBox = document.getElementById('pickup-message-box');
+
+            const familyModal = document.getElementById('family-modal');
+            const familyModalTitle = document.getElementById('family-modal-title');
+            const familyModalMessage = document.getElementById('family-modal-message');
+            const familyMembersList = document.getElementById('family-members-list');
+            const cancelFamilyModal = document.getElementById('cancel-family-modal');
+            const confirmFamilyAction = document.getElementById('confirm-family-action');
+            
+            const pickupFamilyModal = document.getElementById('pickup-family-modal');
+            const pickupFamilyList = document.getElementById('pickup-family-list');
+            const cancelPickupFamily = document.getElementById('cancel-pickup-family');
+            const confirmPickupFamily = document.getElementById('confirm-pickup-family');
+            const pickupFamilyMessage = document.getElementById('pickup-family-message');
+
+            const navUserManagementButton = document.getElementById('nav-user-management');
+            const navParticipantManagementButton = document.getElementById('nav-participant-management');
+            const navParticipantOverviewButton = document.getElementById('nav-participant-overview');
+            const navProgramSettingsButton = document.getElementById('nav-program-settings');
+            const navAlarmButton = document.getElementById('nav-alarm');
+            const participantManagementSection = document.getElementById('participant-management-section');
+            const userManagementSection = document.getElementById('user-management-section');
+            const programSettingsSection = document.getElementById('program-settings-section');
+            const adminParticipantOverviewSection = document.getElementById('admin-participant-overview-section');
+            const adminNavButtons = document.querySelectorAll('.admin-nav-button');
+            const adminSectionWrapper = document.getElementById('admin-section-wrapper');
+            const adminWelcomeMessage = document.getElementById('admin-welcome-message');
+            const excelImportContainer = document.getElementById('excel-import-container');
+
+            const newParticipantRegtypeSelect = document.getElementById('new-participant-regtype');
+            const newParticipantStreetInput = document.getElementById('new-participant-street');
+            const newParticipantCityInput = document.getElementById('new-participant-city');
+            const newParticipantPhoneInput = document.getElementById('new-participant-phone');
+            const newParticipantPaidCheckbox = document.getElementById('new-participant-paid');
+            const newParticipantCanGoHomeAloneCheckbox = document.getElementById('new-participant-can-go-home-alone');
+            const addParticipantManualButton = document.getElementById('add-participant-manual-button');
+            const addParticipantManualMessage = document.getElementById('add-participant-manual-message');
+            const importParticipantsFileInput = document.getElementById('import-participants-file-input');
+            const importParticipantsButton = document.getElementById('import-participants-button');
+            const importParticipantsMessage = document.getElementById('import-participants-message');
+            const noDataCheckbox = document.getElementById('no-data-checkbox');
+            const addSiblingBtn = document.getElementById('add-sibling-row-button');
+            const child2Div = document.getElementById('child2-container');
+            const child3Div = document.getElementById('child3-container');
+
+            const controlModeToggle = document.getElementById('control-mode-toggle');
+            const createBackupButton = document.getElementById('create-backup-button');
+            const loadBackupButton = document.getElementById('load-backup-button');
+            const loadBackupInput = document.getElementById('load-backup-input');
+            const removeAllParticipantsButton = document.getElementById('remove-all-participants-button');
+            const removeDailyParticipantsButton = document.getElementById('remove-daily-participants-button');
+            const resetAllParticipantsButton = document.getElementById('reset-all-participants-button');
+
+            // Global Variables
+            var enteredCode = '';
+            var activeSwipeItem = null;
+            var initialX = 0;
+            var currentTranslateX = 0;
+            var isSwiping = false;
+            var currentParticipantBeingPickedUp = null;
+            var currentLoggedInUsername = '';
+            var currentLoggedInUserStatus = '';
+            var controlModeActive = false;
+            var currentParticipantInDetailsModal = null;
+            var currentConfirmAction = null;
+            var currentAlarmFilter = 'all';
+            var currentAlarmSearchTerm = '';
+            var alarmActive = false;
+            
+            var holdInterval = null;
+            var holdStartTime = 0;
+            var isHolding = false;
+            var alarmAudio = null;
+            var progressCircle = null;
+            var circumference = 2 * Math.PI * 70;
+            
+            var pendingFamilyAction = null;
+            var familyMembersListData = [];
+            var pendingFamilyPickupMembers = null;
+
+            const LOCAL_STORAGE_USERS_KEY = 'ferienprogramm_users';
+            const LOCAL_STORAGE_PARTICIPANTS_KEY = 'ferienprogramm_participants';
+            const LOCAL_STORAGE_CONTROL_MODE_KEY = 'ferienprogramm_control_mode';
+
+            let users = [];
+            let participants = [];
+
+            // CANVAS UNTERSCHRIFT LOGIK
+            let isDrawing = false;
+            let ctx = signatureCanvas.getContext('2d');
+
+            function setupCanvas() {
+                const rect = signatureCanvas.getBoundingClientRect();
+                signatureCanvas.width = rect.width;
+                signatureCanvas.height = 140;
+                ctx.strokeStyle = "#007aff";
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = "round";
+            }
+
+            function startDrawing(e) {
+                isDrawing = true;
+                ctx.beginPath();
+                const pos = getCanvasPos(e);
+                ctx.moveTo(pos.x, pos.y);
+            }
+
+            function draw(e) {
+                if (!isDrawing) return;
+                e.preventDefault();
+                const pos = getCanvasPos(e);
+                ctx.lineTo(pos.x, pos.y);
+                ctx.stroke();
+            }
+
+            function stopDrawing() { isDrawing = false; }
+
+            function getCanvasPos(e) {
+                const rect = signatureCanvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                return { x: clientX - rect.left, y: clientY - rect.top };
+            }
+
+            function clearCanvas() { ctx.clearRect(0, 0, signatureCanvas.width, signatureCanvas.height); }
+
+            signatureCanvas.addEventListener('mousedown', startDrawing);
+            signatureCanvas.addEventListener('mousemove', draw);
+            signatureCanvas.addEventListener('mouseup', stopDrawing);
+            signatureCanvas.addEventListener('touchstart', startDrawing);
+            signatureCanvas.addEventListener('touchmove', draw);
+            signatureCanvas.addEventListener('touchend', stopDrawing);
+
+            clearSignatureButton.addEventListener('click', clearCanvas);
+
+            toggleAuthSectionBtn?.addEventListener('click', () => {
+                authSectionContainer.classList.toggle('hidden');
+                if (!authSectionContainer.classList.contains('hidden')) {
+                    setTimeout(setupCanvas, 100);
                 }
             });
 
-            // Formular absenden
-            const form = document.getElementById('registrationForm');
-            form.addEventListener('submit', async function(e) {
-                e.preventDefault();
-                let isValid = true;
-                
-                // Validierung
-                const requiredFields = [
-                    {id: 'lastName', errorId: 'lastNameError'},
-                    {id: 'firstName', errorId: 'firstNameError'},
-                    {id: 'street', errorId: 'streetError'},
-                    {id: 'city', errorId: 'cityError'},
-                    {id: 'phone', errorId: 'phoneError'},
-                    {id: 'terms', errorId: 'termsError', isCheckbox: true},
-                    {id: 'signatureText', errorId: 'signatureError'}
-                ];
+            saveSignatureButton?.addEventListener('click', async () => {
+                if (!currentParticipantInDetailsModal) return;
+                const allowedPersons = allowedPickupInput.value.trim();
+                const signatureData = signatureCanvas.toDataURL();
 
-                requiredFields.forEach(field => {
-                    const element = document.getElementById(field.id);
-                    const errorElement = document.getElementById(field.errorId);
+                const idx = participants.findIndex(p => p.id === currentParticipantInDetailsModal.id);
+                if (idx > -1) {
+                    participants[idx].allowedPickupPersons = allowedPersons;
+                    participants[idx].signatureImage = signatureData;
+                    await saveParticipants();
+                    showActionFeedback("Berechtigung & Unterschrift gespeichert!", true);
                     
-                    if (!errorElement) {
-                        console.error(`Fehler-Element mit ID ${field.errorId} nicht gefunden!`);
+                    if (signatureData) {
+                        signatureImagePreview.src = signatureData;
+                        signaturePreviewContainer.classList.remove('hidden');
+                    }
+                }
+            });
+
+            downloadPdfButton?.addEventListener('click', () => {
+                if (!currentParticipantInDetailsModal) return;
+                const p = currentParticipantInDetailsModal;
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                doc.setFontSize(20);
+                doc.text("Abholberechtigung Ferienprogramm", 20, 20);
+
+                doc.setFontSize(12);
+                doc.text(`Kind: ${p.name}`, 20, 40);
+                doc.text(`Telefon: ${p.phone || 'Nicht angegeben'}`, 20, 50);
+                doc.text(`Anmeldeart: ${p.registrationType}`, 20, 60);
+
+                doc.setLineWidth(0.5);
+                doc.line(20, 68, 190, 68);
+
+                doc.setFontSize(14);
+                doc.text("Berechtigte Personen zur Abholung:", 20, 80);
+                doc.setFontSize(12);
+                doc.text(p.allowedPickupPersons || "Keine dritten Personen angegeben", 20, 90);
+
+                if (p.signatureImage) {
+                    doc.setFontSize(14);
+                    doc.text("Unterschrift der Erziehungsberechtigten:", 20, 115);
+                    doc.addImage(p.signatureImage, 'PNG', 20, 125, 100, 40);
+                }
+
+                doc.setFontSize(10);
+                doc.text(`Erstellt am: ${new Date().toLocaleDateString('de-DE')}`, 20, 180);
+
+                doc.save(`Abholberechtigung_${p.name.replace(/\s+/g, '_')}.pdf`);
+            });
+
+            function playAlarmSound() {
+                if (alarmAudio) {
+                    alarmAudio.pause();
+                    alarmAudio.currentTime = 0;
+                }
+                alarmAudio = new Audio('https://raw.githubusercontent.com/DittmarJ/tuttikiesiferien/main/Design%20ohne%20Titel.mp3');
+                alarmAudio.play().catch(e => console.log('Audio error:', e));
+            }
+
+            function updateCircularProgress(progress) {
+                if (progressCircle) {
+                    const offset = circumference - (progress / 100) * circumference;
+                    progressCircle.style.strokeDashoffset = offset;
+                }
+            }
+
+            function startHold() {
+                if (isHolding) return;
+                isHolding = true;
+                holdStartTime = Date.now();
+                holdInterval = setInterval(updateHoldProgress, 50);
+            }
+            
+            function stopHold() {
+                if (!isHolding) return;
+                isHolding = false;
+                if (holdInterval) {
+                    clearInterval(holdInterval);
+                    holdInterval = null;
+                }
+                if (holdTimeDisplay) holdTimeDisplay.textContent = '0';
+                updateCircularProgress(0);
+            }
+            
+            function updateHoldProgress() {
+                const elapsed = (Date.now() - holdStartTime) / 1000;
+                const progress = Math.min(100, (elapsed / 5) * 100);
+                if (holdTimeDisplay) holdTimeDisplay.textContent = Math.min(5, elapsed).toFixed(1);
+                updateCircularProgress(progress);
+                
+                if (elapsed >= 5) {
+                    stopHold();
+                    alarmConfirmModal.classList.add('hidden');
+                    playAlarmSound();
+                    alarmActive = true;
+                    participants.forEach(p => {
+                        if (p.status === 'signedIn') {
+                            p.present = false;
+                        }
+                    });
+                    saveParticipants();
+                    showAlarmModal();
+                }
+            }
+            
+            function showAlarmConfirmModal() {
+                if (alarmActive) {
+                    showAlarmModal();
+                    return;
+                }
+                stopHold();
+                if (holdTimeDisplay) holdTimeDisplay.textContent = '0';
+                updateCircularProgress(0);
+                alarmConfirmModal.classList.remove('hidden');
+            }
+            
+            function hideAlarmConfirmModal() {
+                stopHold();
+                alarmConfirmModal.classList.add('hidden');
+            }
+
+            function showMessage(message, isError = true) {
+                messageBox.textContent = message;
+                messageBox.classList.remove('hidden');
+                setTimeout(() => messageBox.classList.add('hidden'), 3000);
+            }
+
+            function showActionFeedback(message, isSuccess = true) {
+                actionFeedbackMessage.textContent = message;
+                actionFeedbackMessage.style.background = isSuccess ? 'rgba(52,199,89,0.95)' : 'rgba(255,59,48,0.95)';
+                actionFeedbackMessage.classList.add('show');
+                setTimeout(() => actionFeedbackMessage.classList.remove('show'), 2000);
+            }
+
+            function showPickupMessageBox(message, isError = true) {
+                pickupMessageBox.textContent = message;
+                pickupMessageBox.classList.remove('hidden');
+                setTimeout(() => pickupMessageBox.classList.add('hidden'), 3000);
+            }
+
+            function showAdminMessage(messageElement, message, isError = true) {
+                messageElement.textContent = message;
+                messageElement.classList.remove('hidden');
+                setTimeout(() => messageElement.classList.add('hidden'), 3000);
+            }
+
+            function updateCodeDisplay() {
+                codeDisplay.textContent = '*'.repeat(enteredCode.length);
+            }
+
+            function resetSearchAndFilter() {
+                if (participantSearchInput) participantSearchInput.value = '';
+                if (sortSelect) sortSelect.value = 'firstNameAsc';
+                renderParticipantList();
+            }
+            
+            function resetAlarmSearch() {
+                if (alarmSearchInput) alarmSearchInput.value = '';
+                currentAlarmSearchTerm = '';
+                renderAlarmList();
+            }
+            
+            function resetParticipantManagementForm() {
+                if (child2Div) child2Div.classList.add('hidden');
+                if (child3Div) child3Div.classList.add('hidden');
+                if (addSiblingBtn) addSiblingBtn.classList.remove('hidden');
+                
+                if (document.getElementById('child1-first-name')) document.getElementById('child1-first-name').value = '';
+                if (document.getElementById('child1-last-name')) document.getElementById('child1-last-name').value = '';
+                if (document.getElementById('child2-first-name')) document.getElementById('child2-first-name').value = '';
+                if (document.getElementById('child2-last-name')) document.getElementById('child2-last-name').value = '';
+                if (document.getElementById('child3-first-name')) document.getElementById('child3-first-name').value = '';
+                if (document.getElementById('child3-last-name')) document.getElementById('child3-last-name').value = '';
+                if (newParticipantStreetInput) newParticipantStreetInput.value = '';
+                if (newParticipantCityInput) newParticipantCityInput.value = '';
+                if (newParticipantPhoneInput) newParticipantPhoneInput.value = '';
+                
+                if (noDataCheckbox) noDataCheckbox.checked = false;
+                if (newParticipantCanGoHomeAloneCheckbox) newParticipantCanGoHomeAloneCheckbox.checked = true;
+                if (newParticipantPaidCheckbox) newParticipantPaidCheckbox.checked = true;
+                
+                if (newParticipantStreetInput) newParticipantStreetInput.disabled = false;
+                if (newParticipantCityInput) newParticipantCityInput.disabled = false;
+                if (newParticipantPhoneInput) newParticipantPhoneInput.disabled = false;
+            }
+
+            function getLastName(fullName) {
+                const parts = fullName.split(' ');
+                return parts.slice(1).join(' ') || '';
+            }
+
+            function getFirstName(fullName) {
+                const parts = fullName.split(' ');
+                return parts[0] || '';
+            }
+
+            function sortParticipants(participantsArray) {
+                const sortValue = sortSelect ? sortSelect.value : 'firstNameAsc';
+                const sorted = [...participantsArray];
+                
+                switch(sortValue) {
+                    case 'firstNameAsc':
+                        return sorted.sort((a, b) => getFirstName(a.name).localeCompare(getFirstName(b.name)));
+                    case 'firstNameDesc':
+                        return sorted.sort((a, b) => getFirstName(b.name).localeCompare(getFirstName(a.name)));
+                    case 'lastNameAsc':
+                        return sorted.sort((a, b) => getLastName(a.name).localeCompare(getLastName(b.name)));
+                    case 'lastNameDesc':
+                        return sorted.sort((a, b) => getLastName(b.name).localeCompare(getLastName(a.name)));
+                    case 'status':
+                        return sorted.sort((a, b) => {
+                            if (a.status === 'signedIn' && b.status !== 'signedIn') return -1;
+                            if (a.status !== 'signedIn' && b.status === 'signedIn') return 1;
+                            return getFirstName(a.name).localeCompare(getFirstName(b.name));
+                        });
+                    default:
+                        return sorted;
+                }
+            }
+
+            function updateAlarmStats() {
+                const signedInParticipants = participants.filter(p => p.status === 'signedIn');
+                const presentParticipants = signedInParticipants.filter(p => p.present === true);
+                const missingParticipants = signedInParticipants.filter(p => !p.present);
+                
+                if (statSignedinCount) statSignedinCount.textContent = signedInParticipants.length;
+                if (statPresentCount) statPresentCount.textContent = presentParticipants.length;
+                if (statMissingCount) statMissingCount.textContent = missingParticipants.length;
+            }
+            
+            function renderAlarmList() {
+                if (!alarmParticipantList) return;
+                
+                const signedInParticipants = participants.filter(p => p.status === 'signedIn');
+                const searchTerm = currentAlarmSearchTerm.toLowerCase();
+                
+                let filteredParticipants = signedInParticipants.filter(p => p.name.toLowerCase().includes(searchTerm));
+                filteredParticipants = sortParticipants(filteredParticipants);
+                
+                if (currentAlarmFilter === 'present') {
+                    filteredParticipants = filteredParticipants.filter(p => p.present === true);
+                } else if (currentAlarmFilter === 'missing') {
+                    filteredParticipants = filteredParticipants.filter(p => !p.present);
+                }
+                
+                alarmParticipantList.innerHTML = '';
+                
+                filteredParticipants.forEach(p => {
+                    const item = document.createElement('li');
+                    item.className = `participant-item-container ${p.present ? 'present' : ''}`;
+                    const actionText = p.present ? 'Abwesend markieren' : 'Anwesend markieren';
+                    const btnClass = 'anwesend-button';
+                    const dotClass = p.present ? 'status-dot-blue' : 'status-dot-red';
+                    const aloneText = p.canGoHomeAlone ? 'Ja' : 'Nein';
+                    
+                    item.innerHTML = `
+                        <div class="participant-action-button-container">
+                            <button class="participant-action-button ${btnClass}" data-action="toggle-present" data-id="${p.id}">
+                                ${actionText}
+                            </button>
+                        </div>
+                        <div class="participant-content-wrapper">
+                            <div class="participant-left">
+                                <span class="status-dot ${dotClass}"></span>
+                                <span class="participant-name">${p.name}</span>
+                            </div>
+                            <div class="participant-right">
+                                <span class="participant-meta">${p.registrationType} | Alleine: ${aloneText}</span>
+                                <span class="info-icon" data-id="${p.id}">i</span>
+                            </div>
+                        </div>
+                    `;
+                    alarmParticipantList.appendChild(item);
+                    
+                    const wrapper = item.querySelector('.participant-content-wrapper');
+                    wrapper.addEventListener('pointerdown', handlePointerDown);
+                    wrapper.addEventListener('pointermove', handlePointerMove);
+                    wrapper.addEventListener('pointerup', handlePointerUp);
+                    wrapper.addEventListener('pointercancel', handlePointerCancel);
+                });
+                
+                updateAlarmStats();
+            }
+            
+            function togglePresent(participantId) {
+                const participant = participants.find(p => p.id === participantId);
+                if (participant && participant.status === 'signedIn') {
+                    participant.present = !participant.present;
+                    saveParticipants();
+                    renderAlarmList();
+                    renderParticipantList();
+                    showActionFeedback(`${participant.name} wurde ${participant.present ? 'als anwesend' : 'als abwesend'} markiert`, true);
+                    resetAlarmSearch();
+                }
+            }
+            
+            function resetAlarm() {
+                participants.forEach(p => {
+                    p.present = false;
+                });
+                saveParticipants();
+                alarmActive = false;
+                renderAlarmList();
+                renderParticipantList();
+                hideAlarmModal();
+                showActionFeedback('Alarm wurde zurückgesetzt.', true);
+            }
+            
+            function showAlarmModal() {
+                if (!alarmActive) {
+                    showAlarmConfirmModal();
+                    return;
+                }
+                
+                participants.forEach(p => {
+                    if (p.present === undefined) p.present = false;
+                });
+                saveParticipants();
+                currentAlarmSearchTerm = '';
+                if (alarmSearchInput) alarmSearchInput.value = '';
+                currentAlarmFilter = 'all';
+                document.querySelectorAll('.alarm-filter-btn').forEach(btn => {
+                    if (btn.dataset.filter === 'all') btn.classList.add('active');
+                    else btn.classList.remove('active');
+                });
+                renderAlarmList();
+                alarmModal.classList.remove('hidden');
+            }
+            
+            function hideAlarmModal() {
+                alarmModal.classList.add('hidden');
+                renderParticipantList();
+            }
+            
+            function showMissingParticipants() {
+                currentAlarmFilter = 'missing';
+                document.querySelectorAll('.alarm-filter-btn').forEach(btn => {
+                    if (btn.dataset.filter === 'missing') btn.classList.add('active');
+                    else btn.classList.remove('active');
+                });
+                renderAlarmList();
+            }
+            
+            function showPresentParticipants() {
+                currentAlarmFilter = 'present';
+                document.querySelectorAll('.alarm-filter-btn').forEach(btn => {
+                    if (btn.dataset.filter === 'present') btn.classList.add('active');
+                    else btn.classList.remove('active');
+                });
+                renderAlarmList();
+            }
+            
+            function showAllParticipants() {
+                currentAlarmFilter = 'all';
+                document.querySelectorAll('.alarm-filter-btn').forEach(btn => {
+                    if (btn.dataset.filter === 'all') btn.classList.add('active');
+                    else btn.classList.remove('active');
+                });
+                renderAlarmList();
+            }
+
+            async function loadUsers() {
+                try {
+                    let loadedUsers = await dbGetAll('users');
+                    if (!loadedUsers || loadedUsers.length === 0) {
+                        const storedLegacy = localStorage.getItem(LOCAL_STORAGE_USERS_KEY);
+                        if (storedLegacy) {
+                            loadedUsers = JSON.parse(storedLegacy);
+                        } else {
+                            loadedUsers = [
+                                { id: Date.now() + '0', username: 'Betreuer', code: '1111', status: 'Betreuer', active: true },
+                                { id: Date.now() + '1', username: 'Betreuungsleitung', code: '2222', status: 'Betreuungsleitung', active: true },
+                                { id: Date.now() + '2', username: 'Admin', code: '240309', status: 'admin', active: true }
+                            ];
+                        }
+                        users = loadedUsers;
+                        await saveUsers();
+                    } else {
+                        users = loadedUsers;
+                    }
+                    renderUserList();
+                } catch(e) { users = []; }
+            }
+
+            async function saveUsers() {
+                await dbSaveAll('users', users);
+                renderUserList();
+            }
+
+            function renderUserList() {
+                userListElement.innerHTML = '';
+                if (users.length === 0) {
+                    userListElement.innerHTML = '<li class="text-center text-[#8e8e93]">Keine Benutzer</li>';
+                    return;
+                }
+                users.forEach(u => {
+                    const li = document.createElement('li');
+                    li.className = `glass-panel p-3 flex justify-between items-center ${!u.active ? 'user-inactive' : ''}`;
+                    li.innerHTML = `
+                        <div>
+                            <span class="font-semibold">${u.username}</span> 
+                            <span class="text-xs text-[#8e8e93]">(${'*'.repeat(u.code.length)})</span> - ${u.status}
+                            ${!u.active ? ' (inaktiv)' : ''}
+                        </div>
+                        <div class="flex space-x-2">
+                            <button data-id="${u.id}" class="toggle-user-active-button text-[#ff9500] text-sm rounded-button px-2 py-1 bg-white/50">${u.active ? 'Deaktivieren' : 'Aktivieren'}</button>
+                            <button data-id="${u.id}" class="change-user-status-button text-[#007aff] text-sm rounded-button px-2 py-1 bg-white/50">${u.status === 'admin' ? '→ Betreuer' : (u.status === 'Betreuungsleitung' ? '→ Admin' : '→ Betreuungsleitung')}</button>
+                            <button data-id="${u.id}" data-username="${u.username}" data-type="user" class="delete-item-button text-[#ff3b30] text-sm rounded-button px-2 py-1 bg-white/50">Löschen</button>
+                        </div>
+                    `;
+                    userListElement.appendChild(li);
+                });
+            }
+
+            async function loadParticipants() {
+                try {
+                    let loadedParticipants = await dbGetAll('participants');
+                    if (!loadedParticipants || loadedParticipants.length === 0) {
+                        const storedLegacy = localStorage.getItem(LOCAL_STORAGE_PARTICIPANTS_KEY);
+                        if (storedLegacy) {
+                            loadedParticipants = JSON.parse(storedLegacy);
+                        } else {
+                            loadedParticipants = [
+                                { id: Date.now() + 'A', name: 'Lea Schneider', status: 'available', registrationType: 'Tagesanmeldung', street: 'Musterweg 1', city: 'Musterstadt', phone: '01761234567', paid: true, canGoHomeAlone: false, noData: false, present: false, pickedUpBy: '', allowedPickupPersons: '', signatureImage: '', activityHistory: [], comments: [] },
+                                { id: Date.now() + 'B', name: 'Max Mustermann', status: 'available', registrationType: 'Wochenanmeldung', street: 'Beispielallee 5', city: 'Beispielort', phone: '01519876543', paid: false, canGoHomeAlone: true, noData: false, present: false, pickedUpBy: '', allowedPickupPersons: '', signatureImage: '', activityHistory: [], comments: [] }
+                            ];
+                        }
+                    }
+
+                    participants = loadedParticipants.map(p => ({
+                        id: String(p.id),
+                        name: p.name || '',
+                        status: p.status || 'available',
+                        registrationType: p.registrationType || 'Tagesanmeldung',
+                        street: p.street || '',
+                        city: p.city || '',
+                        phone: p.phone || '',
+                        paid: p.paid !== undefined ? p.paid : false,
+                        canGoHomeAlone: p.canGoHomeAlone !== undefined ? p.canGoHomeAlone : false,
+                        noData: p.noData || false,
+                        present: p.present || false,
+                        pickedUpBy: p.pickedUpBy || '',
+                        allowedPickupPersons: p.allowedPickupPersons || '',
+                        signatureImage: p.signatureImage || '',
+                        activityHistory: p.activityHistory || [],
+                        comments: p.comments || []
+                    }));
+
+                    await saveParticipants();
+                } catch(e) { participants = []; }
+            }
+
+            async function saveParticipants() {
+                const toSave = participants.map(p => ({
+                    id: String(p.id),
+                    name: p.name,
+                    status: p.status,
+                    registrationType: p.registrationType,
+                    street: p.street,
+                    city: p.city,
+                    phone: p.phone,
+                    paid: p.paid,
+                    canGoHomeAlone: p.canGoHomeAlone,
+                    noData: p.noData,
+                    present: p.present || false,
+                    pickedUpBy: p.pickedUpBy,
+                    allowedPickupPersons: p.allowedPickupPersons || '',
+                    signatureImage: p.signatureImage || '',
+                    activityHistory: p.activityHistory,
+                    comments: p.comments
+                }));
+
+                await dbSaveAll('participants', toSave);
+                renderParticipantList();
+            }
+
+            async function loadControlMode() {
+                const dbVal = await dbGetSetting(LOCAL_STORAGE_CONTROL_MODE_KEY);
+                if (dbVal !== null) {
+                    controlModeActive = dbVal;
+                } else {
+                    controlModeActive = localStorage.getItem(LOCAL_STORAGE_CONTROL_MODE_KEY) === 'true';
+                }
+                if (controlModeToggle) controlModeToggle.checked = controlModeActive;
+            }
+
+            async function saveControlMode() {
+                await dbSaveSetting(LOCAL_STORAGE_CONTROL_MODE_KEY, controlModeActive);
+            }
+
+            function closeAllSwipedItems(exclude = null) {
+                document.querySelectorAll('.participant-item-container.swiped').forEach(item => {
+                    const wrapper = item.querySelector('.participant-content-wrapper');
+                    if (wrapper && wrapper !== exclude) wrapper.style.transform = 'translateX(0px)';
+                    item.classList.remove('swiped');
+                });
+            }
+
+            function handlePointerDown(e) {
+                if (e.button !== 0 && e.pointerType !== 'touch') return;
+                closeAllSwipedItems(this);
+                activeSwipeItem = this;
+                isSwiping = true;
+                initialX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                currentTranslateX = 0;
+                this.setPointerCapture(e.pointerId);
+            }
+
+            function handlePointerMove(e) {
+                if (!isSwiping || !activeSwipeItem) return;
+                const clientX = e.clientX || (e.touches ? e.touches[0].clientX : 0);
+                const deltaX = clientX - initialX;
+                const buttonWidth = 120;
+                currentTranslateX = Math.min(0, deltaX);
+                currentTranslateX = Math.max(-buttonWidth, currentTranslateX);
+                activeSwipeItem.style.transform = `translateX(${currentTranslateX}px)`;
+            }
+
+            function handlePointerUp(e) {
+                if (!isSwiping || !activeSwipeItem) return;
+                isSwiping = false;
+                activeSwipeItem.releasePointerCapture(e.pointerId);
+                const wrapper = activeSwipeItem;
+                const container = activeSwipeItem.parentNode;
+                const threshold = 40;
+                const buttonWidth = 120;
+                if (currentTranslateX < -threshold) {
+                    wrapper.style.transform = `translateX(-${buttonWidth}px)`;
+                    container.classList.add('swiped');
+                } else {
+                    wrapper.style.transform = 'translateX(0px)';
+                    container.classList.remove('swiped');
+                }
+                currentTranslateX = 0;
+                if (activeSwipeItem === this) activeSwipeItem = null;
+            }
+
+            function handlePointerCancel(e) {
+                if (!isSwiping || !activeSwipeItem) return;
+                isSwiping = false;
+                activeSwipeItem.releasePointerCapture(e.pointerId);
+                activeSwipeItem.style.transform = 'translateX(0px)';
+                activeSwipeItem.parentNode.classList.remove('swiped');
+                currentTranslateX = 0;
+                if (activeSwipeItem === this) activeSwipeItem = null;
+            }
+
+            function showFamilyModal(lastName, action, participantsWithSameLastName) {
+                pendingFamilyAction = action;
+                familyModalTitle.textContent = action === 'anmelden' ? 'Familienmitglieder anmelden' : 'Familienmitglieder abmelden';
+                familyModalMessage.innerHTML = `Folgende Kinder mit dem Nachnamen <strong>${lastName}</strong> wurden gefunden. Bitte wählen Sie aus, welche Sie ${action === 'anmelden' ? 'anmelden' : 'abmelden'} möchten:`;
+                
+                familyMembersListData = participantsWithSameLastName.map(p => ({
+                    id: p.id,
+                    name: p.name,
+                    status: p.status,
+                    canGoHomeAlone: p.canGoHomeAlone,
+                    checked: (action === 'anmelden' && p.status === 'available') || (action === 'abmelden' && p.status === 'signedIn')
+                }));
+                
+                renderFamilyMembersList();
+                familyModal.classList.remove('hidden');
+            }
+
+            function renderFamilyMembersList() {
+                familyMembersList.innerHTML = '';
+                familyMembersListData.forEach(member => {
+                    const isApplicable = (pendingFamilyAction === 'anmelden' && member.status === 'available') || 
+                                        (pendingFamilyAction === 'abmelden' && member.status === 'signedIn');
+                    const div = document.createElement('div');
+                    div.className = 'family-modal-item flex items-center justify-between';
+                    div.innerHTML = `
+                        <div>
+                            <span class="font-medium">${member.name}</span>
+                            <span class="text-xs text-[#8e8e93] ml-2">${member.status === 'signedIn' ? 'angemeldet' : 'abgemeldet'}</span>
+                            ${!member.canGoHomeAlone && pendingFamilyAction === 'abmelden' ? '<span class="text-xs text-[#ff9500] ml-2">(benötigt Abholung)</span>' : ''}
+                        </div>
+                        ${isApplicable ? 
+                            `<input type="checkbox" data-id="${member.id}" class="family-checkbox h-5 w-5 rounded" ${member.checked ? 'checked' : ''}>` : 
+                            `<span class="text-xs text-[#8e8e93]">${pendingFamilyAction === 'anmelden' ? 'bereits angemeldet' : 'bereits abgemeldet'}</span>`
+                        }
+                    `;
+                    familyMembersList.appendChild(div);
+                });
+                
+                document.querySelectorAll('.family-checkbox').forEach(cb => {
+                    cb.addEventListener('change', (e) => {
+                        const id = e.target.dataset.id;
+                        const member = familyMembersListData.find(m => m.id === id);
+                        if (member) member.checked = e.target.checked;
+                    });
+                });
+            }
+
+            function showPickupForFamily(selectedMembers) {
+                const membersNeedingPickup = selectedMembers.filter(m => !m.canGoHomeAlone);
+                if (membersNeedingPickup.length === 0) {
+                    executeFamilyActionWithPickup(selectedMembers, null);
+                    return;
+                }
+                
+                const childNames = membersNeedingPickup.map(m => m.name).join(', ');
+                
+                pickupFamilyList.innerHTML = `
+                    <div class="pickup-for-family-item">
+                        <p class="font-medium mb-3">Die folgenden Kinder dürfen nicht alleine nach Hause:</p>
+                        <p class="text-sm text-[#6c6c70] mb-4">${childNames}</p>
+                        <p class="font-medium mb-2">Abholperson für alle Kinder:</p>
+                        <select id="family-pickup-select" class="w-full p-2 rounded-button mb-2">
+                            <option value="">Bitte wählen</option>
+                            <option value="Mutter">Mutter</option>
+                            <option value="Vater">Vater</option>
+                            <option value="Oma">Oma</option>
+                            <option value="Opa">Opa</option>
+                            <option value="Geschwister">Geschwister</option>
+                            <option value="Berechtigte Person">Berechtigte Person (lt. Unterschrift)</option>
+                            <option value="Sonstige">Sonstige (bitte angeben)</option>
+                        </select>
+                        <div id="family-custom-pickup-container" class="hidden mt-2">
+                            <input type="text" id="family-custom-pickup-input" placeholder="Name der abholenden Person" class="w-full p-2 rounded-button">
+                        </div>
+                    </div>
+                `;
+                
+                const select = document.getElementById('family-pickup-select');
+                const customContainer = document.getElementById('family-custom-pickup-container');
+                
+                select.addEventListener('change', () => {
+                    if (select.value === 'Sonstige' || select.value === 'Berechtigte Person') {
+                        customContainer.classList.remove('hidden');
+                    } else {
+                        customContainer.classList.add('hidden');
+                    }
+                });
+                
+                pendingFamilyPickupMembers = selectedMembers;
+                pickupFamilyModal.classList.remove('hidden');
+            }
+            
+            function executeFamilyActionWithPickup(selectedMembers, pickupPerson) {
+                let successCount = 0;
+                selectedMembers.forEach(member => {
+                    const participantIndex = participants.findIndex(p => p.id === member.id);
+                    if (participantIndex > -1) {
+                        const p = participants[participantIndex];
+                        if (pendingFamilyAction === 'anmelden' && p.status === 'available') {
+                            p.status = 'signedIn';
+                            p.pickedUpBy = '';
+                            p.activityHistory.push({ type: 'Angemeldet', time: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'Unbekannt' });
+                            successCount++;
+                        } else if (pendingFamilyAction === 'abmelden' && p.status === 'signedIn') {
+                            p.status = 'available';
+                            if (pickupPerson) {
+                                p.pickedUpBy = pickupPerson;
+                            } else {
+                                p.pickedUpBy = p.canGoHomeAlone ? 'Alleine nach Hause' : 'Unbekannt';
+                            }
+                            p.activityHistory.push({ 
+                                type: 'Abgemeldet', 
+                                time: new Date().toLocaleString('de-DE'), 
+                                by: currentLoggedInUsername || 'Unbekannt', 
+                                pickup: p.pickedUpBy 
+                            });
+                            successCount++;
+                        }
+                        participants[participantIndex] = p;
+                    }
+                });
+                
+                if (successCount > 0) {
+                    saveParticipants();
+                    showActionFeedback(`${successCount} ${pendingFamilyAction === 'anmelden' ? 'angemeldet' : 'abgemeldet'}!`, true);
+                } else {
+                    showActionFeedback(`Keine Änderungen vorgenommen.`, false);
+                }
+            }
+            
+            function executeFamilyAction() {
+                const selectedMembers = familyMembersListData.filter(m => m.checked);
+                if (selectedMembers.length === 0) {
+                    showActionFeedback('Keine Familienmitglieder ausgewählt.', false);
+                    familyModal.classList.add('hidden');
+                    return;
+                }
+                
+                if (pendingFamilyAction === 'abmelden') {
+                    const needsPickup = selectedMembers.some(m => !m.canGoHomeAlone);
+                    if (needsPickup) {
+                        familyModal.classList.add('hidden');
+                        showPickupForFamily(selectedMembers);
                         return;
                     }
-
-                    if ((field.isCheckbox && !element.checked) || (!field.isCheckbox && !element.value)) {
-                        errorElement.textContent = 'Dieses Feld ist erforderlich';
-                        isValid = false;
-                    } else {
-                        errorElement.textContent = '';
+                }
+                
+                executeFamilyActionWithPickup(selectedMembers, null);
+                familyModal.classList.add('hidden');
+                pendingFamilyAction = null;
+                familyMembersListData = [];
+            }
+            
+            function confirmFamilyPickup() {
+                const select = document.getElementById('family-pickup-select');
+                let pickupPerson = select ? select.value : '';
+                
+                if (pickupPerson === 'Sonstige' || pickupPerson === 'Berechtigte Person') {
+                    const customInput = document.getElementById('family-custom-pickup-input');
+                    pickupPerson = customInput ? customInput.value.trim() : '';
+                    if (!pickupPerson) {
+                        pickupFamilyMessage.textContent = 'Bitte geben Sie den Namen der abholenden Person ein.';
+                        pickupFamilyMessage.classList.remove('hidden');
+                        return;
                     }
+                } else if (!pickupPerson) {
+                    pickupFamilyMessage.textContent = 'Bitte wählen Sie eine Abholperson aus.';
+                    pickupFamilyMessage.classList.remove('hidden');
+                    return;
+                }
+                
+                pickupFamilyMessage.classList.add('hidden');
+                executeFamilyActionWithPickup(pendingFamilyPickupMembers, pickupPerson);
+                
+                pickupFamilyModal.classList.add('hidden');
+                familyModal.classList.add('hidden');
+                pendingFamilyAction = null;
+                familyMembersListData = [];
+                pendingFamilyPickupMembers = null;
+            }
+
+            function addChild(firstName, lastName, regType, noData, street, city, phone, paid, canGoHomeAlone, signIn = false) {
+                const newP = {
+                    id: Date.now().toString(),
+                    name: `${firstName} ${lastName}`,
+                    status: signIn ? 'signedIn' : 'available',
+                    registrationType: regType,
+                    street: noData ? '' : street,
+                    city: noData ? '' : city,
+                    phone: noData ? '' : phone,
+                    paid: paid,
+                    canGoHomeAlone: canGoHomeAlone,
+                    noData: noData,
+                    pickedUpBy: '',
+                    allowedPickupPersons: '',
+                    signatureImage: '',
+                    present: false,
+                    activityHistory: signIn ? [{ type: 'Angemeldet', time: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'System' }] : [],
+                    comments: []
+                };
+                participants.push(newP);
+                return newP;
+            }
+
+            function renderParticipantList() {
+                if (!unifiedParticipantList) return;
+                unifiedParticipantList.innerHTML = '';
+
+                const searchTerm = participantSearchInput?.value.toLowerCase() || '';
+
+                let filtered = [...participants].filter(p => {
+                    return p.name.toLowerCase().includes(searchTerm);
                 });
                 
-                // Daten speichern
-                if (isValid) {
-                    try {
-                        const formData = {
-                            date: document.getElementById('date').value,
-                            lastName: document.getElementById('lastName').value,
-                            firstName: document.getElementById('firstName').value,
-                            street: document.getElementById('street').value,
-                            city: document.getElementById('city').value,
-                            phone: document.getElementById('phone').value,
-                            dayFee: document.getElementById('dayFee').checked,
-                            lunch: document.getElementById('lunch').checked,
-                            aloneHome: document.getElementById('aloneHome').checked,
-                            signature: document.getElementById('signatureText').value,
-                            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-                        };
+                filtered = sortParticipants(filtered);
+
+                const signedCount = filtered.filter(p => p.status !== 'available').length;
+                const countSpan = document.getElementById('participant-count');
+                if (countSpan) countSpan.textContent = signedCount;
+
+                let hasAny = false;
+                filtered.forEach(p => {
+                    const item = document.createElement('li');
+                    item.className = `participant-item-container ${p.status}`;
+                    const actionText = p.status === 'available' ? 'Anmelden' : 'Abmelden';
+                    const btnClass = p.status === 'available' ? 'anmelden-button' : 'abmelden-button';
+                    let dotClass = '';
+                    if (p.status === 'signedIn') dotClass = 'status-dot-green';
+                    else if (p.activityHistory.length === 0) dotClass = 'status-dot-gray';
+                    else dotClass = 'status-dot-red';
+                    const aloneText = p.canGoHomeAlone ? 'Ja' : 'Nein';
+                    const nameColor = (controlModeActive && !p.paid) ? 'text-[#ff3b30]' : '';
+                    const commentBadge = (p.comments?.length > 0) ? '<span class="comment-icon" title="Kommentare vorhanden">C</span>' : '';
+                    const authBadge = (p.allowedPickupPersons) ? '<span class="auth-icon" title="Abholberechtigung vorhanden">✍️</span>' : '';
+                    
+                    item.innerHTML = `
+                        <div class="participant-action-button-container">
+                            <button class="participant-action-button ${btnClass}" data-action="${actionText.toLowerCase()}" data-id="${p.id}">${actionText}</button>
+                        </div>
+                        <div class="participant-content-wrapper">
+                            <div class="participant-left">
+                                <span class="status-dot ${dotClass}"></span>
+                                <span class="participant-name ${nameColor}">${p.name}</span>
+                            </div>
+                            <div class="participant-right">
+                                <span class="participant-meta">${p.registrationType} | Alleine: ${aloneText}</span>
+                                ${commentBadge}
+                                ${authBadge}
+                                <span class="info-icon" data-id="${p.id}">i</span>
+                            </div>
+                        </div>
+                    `;
+                    unifiedParticipantList.appendChild(item);
+                    hasAny = true;
+                    const wrapper = item.querySelector('.participant-content-wrapper');
+                    wrapper.addEventListener('pointerdown', handlePointerDown);
+                    wrapper.addEventListener('pointermove', handlePointerMove);
+                    wrapper.addEventListener('pointerup', handlePointerUp);
+                    wrapper.addEventListener('pointercancel', handlePointerCancel);
+                });
+                if (noParticipantsMessageUnified) noParticipantsMessageUnified.classList.toggle('hidden', hasAny);
+            }
+
+            function setAdminEditMode(isEditing) {
+                const displays = [detailsFirstNameDisplay, detailsLastNameDisplay, detailsStreetDisplay, detailsCityDisplay, detailsPhoneDisplay, detailsRegtypeDisplay, detailsPaidDisplay, detailsCanGoHomeAloneDisplay, detailsNoDataDisplay];
+                const inputs = [detailsFirstNameInput, detailsLastNameInput, detailsStreetInput, detailsCityInput, detailsPhoneInput, detailsRegtypeSelect, detailsPaidInput, detailsCanGoHomeAloneInput, detailsNoDataInput];
+                displays.forEach(el => { if(el) el.classList.toggle('hidden', isEditing); });
+                inputs.forEach(el => { if(el) el.classList.toggle('hidden', !isEditing); });
+                if (saveDetailsButton) saveDetailsButton.classList.toggle('hidden', !isEditing);
+            }
+
+            function showConfirmationModal(title, msg, callback) {
+                deleteModalTitle.textContent = title;
+                deleteModalMessage.innerHTML = msg;
+                deleteModal.classList.remove('hidden');
+                currentConfirmAction = callback;
+            }
+
+            function showAdminSection(sectionId) {
+                const sections = [userManagementSection, participantManagementSection, adminParticipantOverviewSection, programSettingsSection];
+                sections.forEach(s => { if(s) s.classList.add('hidden'); });
+                if (adminWelcomeMessage) adminWelcomeMessage.classList.add('hidden');
+                adminNavButtons.forEach(b => b.classList.remove('active'));
+                if (unifiedParticipantContainer) unifiedParticipantContainer.classList.add('hidden');
+                
+                if (sectionId && adminSectionWrapper) {
+                    adminSectionWrapper.classList.remove('hidden');
+                    if (sectionId === 'user-management-section' && userManagementSection) {
+                        userManagementSection.classList.remove('hidden');
+                        if (navUserManagementButton) navUserManagementButton.classList.add('active');
+                    } else if (sectionId === 'participant-management-section' && participantManagementSection) {
+                        participantManagementSection.classList.remove('hidden');
+                        if (navParticipantManagementButton) navParticipantManagementButton.classList.add('active');
+                        resetParticipantManagementForm();
+                    } else if (sectionId === 'admin-participant-overview-section' && adminParticipantOverviewSection) {
+                        adminParticipantOverviewSection.classList.remove('hidden');
+                        if (navParticipantOverviewButton) navParticipantOverviewButton.classList.add('active');
+                        if (unifiedParticipantContainer) unifiedParticipantContainer.classList.remove('hidden');
+                        renderParticipantList();
+                    } else if (sectionId === 'program-settings-section' && programSettingsSection) {
+                        programSettingsSection.classList.remove('hidden');
+                        if (navProgramSettingsButton) navProgramSettingsButton.classList.add('active');
+                    }
+                } else if (adminSectionWrapper && adminWelcomeMessage) {
+                    adminSectionWrapper.classList.add('hidden');
+                    adminWelcomeMessage.classList.remove('hidden');
+                }
+            }
+
+            function showAdminOverlay() {
+                const participantManagementClone = participantManagementSection.cloneNode(true);
+                participantManagementClone.classList.remove('hidden');
+                adminOverlayContent.innerHTML = '';
+                adminOverlayContent.appendChild(participantManagementClone);
+                
+                const overlayExcelContainer = adminOverlayContent.querySelector('#excel-import-container');
+                if (overlayExcelContainer) overlayExcelContainer.classList.add('hidden');
+                
+                const overlayAddButton = adminOverlayContent.querySelector('#add-participant-manual-button');
+                const overlayAddAndSignin = adminOverlayContent.querySelector('#add-and-signin-participant-button');
+                const overlayAddSiblingBtn = adminOverlayContent.querySelector('#add-sibling-row-button');
+                const overlayChild2Div = adminOverlayContent.querySelector('#child2-container');
+                const overlayChild3Div = adminOverlayContent.querySelector('#child3-container');
+                const overlayNoDataCheckbox = adminOverlayContent.querySelector('#no-data-checkbox');
+                const overlayStreetInput = adminOverlayContent.querySelector('#new-participant-street');
+                const overlayCityInput = adminOverlayContent.querySelector('#new-participant-city');
+                const overlayPhoneInput = adminOverlayContent.querySelector('#new-participant-phone');
+                
+                if (overlayAddButton) {
+                    overlayAddButton.addEventListener('click', () => {
+                        const firstName = adminOverlayContent.querySelector('#child1-first-name')?.value.trim();
+                        const lastName = adminOverlayContent.querySelector('#child1-last-name')?.value.trim();
                         
-                        await db.collection('registrations').add(formData);
-                        alert('Anmeldung erfolgreich gespeichert!');
-                        form.reset();
-                    } catch (error) {
-                        console.error('Fehler:', error);
-                        alert('Fehler beim Speichern: ' + error.message);
+                        if (!firstName || !lastName) {
+                            const msgDiv = adminOverlayContent.querySelector('#add-participant-manual-message');
+                            if (msgDiv) showAdminMessage(msgDiv, "Vor- und Nachname erforderlich", true);
+                            return;
+                        }
+                        const noData = overlayNoDataCheckbox?.checked || false;
+                        const regType = newParticipantRegtypeSelect?.value || 'Tagesanmeldung';
+                        const street = overlayStreetInput?.value.trim() || '';
+                        const city = overlayCityInput?.value.trim() || '';
+                        const phone = overlayPhoneInput?.value.trim() || '';
+                        const paid = newParticipantPaidCheckbox?.checked || false;
+                        const canGoHomeAlone = newParticipantCanGoHomeAloneCheckbox?.checked || false;
+                        
+                        addChild(firstName, lastName, regType, noData, street, city, phone, paid, canGoHomeAlone, false);
+                        saveParticipants();
+                        const msgDiv = adminOverlayContent.querySelector('#add-participant-manual-message');
+                        if (msgDiv) showAdminMessage(msgDiv, `${firstName} ${lastName} hinzugefügt`, false);
+                        adminOverlayContent.querySelector('#child1-first-name').value = '';
+                        adminOverlayContent.querySelector('#child1-last-name').value = '';
+                        renderParticipantList();
+                        resetParticipantManagementForm();
+                    });
+                }
+                
+                if (overlayAddAndSignin) {
+                    overlayAddAndSignin.addEventListener('click', () => {
+                        const firstName = adminOverlayContent.querySelector('#child1-first-name')?.value.trim();
+                        const lastName = adminOverlayContent.querySelector('#child1-last-name')?.value.trim();
+                        
+                        if (!firstName || !lastName) {
+                            const msgDiv = adminOverlayContent.querySelector('#add-participant-manual-message');
+                            if (msgDiv) showAdminMessage(msgDiv, "Vor- und Nachname erforderlich", true);
+                            return;
+                        }
+                        const noData = overlayNoDataCheckbox?.checked || false;
+                        const regType = newParticipantRegtypeSelect?.value || 'Tagesanmeldung';
+                        const street = overlayStreetInput?.value.trim() || '';
+                        const city = overlayCityInput?.value.trim() || '';
+                        const phone = overlayPhoneInput?.value.trim() || '';
+                        const paid = newParticipantPaidCheckbox?.checked || false;
+                        const canGoHomeAlone = newParticipantCanGoHomeAloneCheckbox?.checked || false;
+                        
+                        addChild(firstName, lastName, regType, noData, street, city, phone, paid, canGoHomeAlone, true);
+                        saveParticipants();
+                        const msgDiv = adminOverlayContent.querySelector('#add-participant-manual-message');
+                        if (msgDiv) showAdminMessage(msgDiv, `${firstName} ${lastName} hinzugefügt und angemeldet`, false);
+                        adminOverlayContent.querySelector('#child1-first-name').value = '';
+                        adminOverlayContent.querySelector('#child1-last-name').value = '';
+                        renderParticipantList();
+                        resetParticipantManagementForm();
+                    });
+                }
+                
+                if (overlayAddSiblingBtn && overlayChild2Div && overlayChild3Div) {
+                    overlayAddSiblingBtn.addEventListener('click', () => {
+                        if (overlayChild2Div.classList.contains('hidden')) {
+                            overlayChild2Div.classList.remove('hidden');
+                        } else if (overlayChild3Div.classList.contains('hidden')) {
+                            overlayChild3Div.classList.remove('hidden');
+                            overlayAddSiblingBtn.classList.add('hidden');
+                        }
+                    });
+                }
+                
+                if (overlayNoDataCheckbox && overlayStreetInput && overlayCityInput && overlayPhoneInput) {
+                    overlayNoDataCheckbox.addEventListener('change', function() {
+                        const disabled = this.checked;
+                        overlayStreetInput.disabled = disabled;
+                        overlayCityInput.disabled = disabled;
+                        overlayPhoneInput.disabled = disabled;
+                        if (disabled) {
+                            overlayStreetInput.value = '';
+                            overlayCityInput.value = '';
+                            overlayPhoneInput.value = '';
+                        }
+                    });
+                }
+                
+                adminOverlay.classList.remove('hidden');
+            }
+
+            function hideAdminOverlay() {
+                adminOverlay.classList.add('hidden');
+            }
+
+            function handleLogout() {
+                if (mainContentScreen) mainContentScreen.classList.add('hidden');
+                if (adminContentScreen) adminContentScreen.classList.add('hidden');
+                if (unifiedParticipantContainer) unifiedParticipantContainer.classList.add('hidden');
+                if (instructionsScreen) instructionsScreen.classList.add('hidden');
+                if (familyModal) familyModal.classList.add('hidden');
+                if (pickupFamilyModal) pickupFamilyModal.classList.add('hidden');
+                if (pickupModal) pickupModal.classList.add('hidden');
+                if (participantDetailsModal) participantDetailsModal.classList.add('hidden');
+                if (adminOverlay) adminOverlay.classList.add('hidden');
+                if (alarmModal) alarmModal.classList.add('hidden');
+                if (alarmConfirmModal) alarmConfirmModal.classList.add('hidden');
+                if (loginScreen) loginScreen.classList.remove('hidden');
+                
+                enteredCode = '';
+                updateCodeDisplay();
+                currentLoggedInUsername = '';
+                currentLoggedInUserStatus = '';
+                if (messageBox) messageBox.classList.add('hidden');
+                
+                pendingFamilyAction = null;
+                familyMembersListData = [];
+                pendingFamilyPickupMembers = null;
+                stopHold();
+                
+                resetInactivityTimer();
+            }
+
+            function createBackup(manual = false) {
+                const data = JSON.stringify(participants);
+                if (manual) {
+                    const blob = new Blob([data], { type: 'application/json' });
+                    const a = document.createElement('a');
+                    a.href = URL.createObjectURL(blob);
+                    a.download = `backup_ferienprogramm_${Date.now()}.json`;
+                    a.click();
+                    showMessage("Sicherung erstellt", false);
+                }
+            }
+
+            let inactivityTimer;
+            const INACTIVITY_LIMIT = 60 * 1000;
+            function resetInactivityTimer() {
+                clearTimeout(inactivityTimer);
+                if (loginScreen && !loginScreen.classList.contains('hidden')) return;
+                inactivityTimer = setTimeout(() => {
+                    handleLogout();
+                    showMessage("Wegen Inaktivität abgemeldet", true);
+                }, INACTIVITY_LIMIT);
+            }
+
+            function initCircularProgress() {
+                if (circularHoldBtn) {
+                    const svg = circularHoldBtn.querySelector('.circular-progress-ring');
+                    if (svg) {
+                        const circle = svg.querySelector('.circular-progress-ring-circle');
+                        if (circle) {
+                            progressCircle = circle;
+                            progressCircle.style.strokeDasharray = circumference;
+                            progressCircle.style.strokeDashoffset = circumference;
+                        }
                     }
                 }
+            }
+
+            // Event Listeners
+            keypadButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const val = btn.dataset.value;
+                    const action = btn.dataset.action;
+                    messageBox.classList.add('hidden');
+                    if (val) { if (enteredCode.length < 6) enteredCode += val; }
+                    else if (action === 'clear') enteredCode = enteredCode.slice(0, -1);
+                    else if (action === 'enter') {
+                        const user = users.find(u => u.code === enteredCode && u.active !== false);
+                        if (user) {
+                            loginScreen.classList.add('hidden');
+                            enteredCode = '';
+                            updateCodeDisplay();
+                            currentLoggedInUsername = user.username;
+                            currentLoggedInUserStatus = user.status;
+                            if (user.status === 'admin') {
+                                mainContentScreen.classList.add('hidden');
+                                adminContentScreen.classList.remove('hidden');
+                                showAdminSection('');
+                                if (alarmLinkContainer) alarmLinkContainer.classList.add('hidden');
+                                if (alarmResetContainer) alarmResetContainer.classList.remove('hidden');
+                                showMessage(`Willkommen Admin ${user.username}`, false);
+                            } else if (user.status === 'Betreuungsleitung') {
+                                adminContentScreen.classList.add('hidden');
+                                mainContentScreen.classList.remove('hidden');
+                                unifiedParticipantContainer.classList.remove('hidden');
+                                betreuerNameDisplay.textContent = user.username;
+                                renderParticipantList();
+                                if (alarmLinkContainer) alarmLinkContainer.classList.remove('hidden');
+                                if (alarmResetContainer) alarmResetContainer.classList.add('hidden');
+                                showMessage(`Willkommen ${user.username} (Betreuungsleitung)`, false);
+                            } else {
+                                adminContentScreen.classList.add('hidden');
+                                mainContentScreen.classList.remove('hidden');
+                                unifiedParticipantContainer.classList.remove('hidden');
+                                betreuerNameDisplay.textContent = user.username;
+                                renderParticipantList();
+                                if (alarmLinkContainer) alarmLinkContainer.classList.add('hidden');
+                                if (alarmResetContainer) alarmResetContainer.classList.add('hidden');
+                                showMessage(`Willkommen ${user.username}`, false);
+                            }
+                        } else {
+                            showMessage('Falscher Code oder Benutzer inaktiv');
+                            enteredCode = '';
+                        }
+                    }
+                    updateCodeDisplay();
+                    resetInactivityTimer();
+                });
             });
+
+            if (alarmPanelLink) {
+                alarmPanelLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showAlarmConfirmModal();
+                });
+            }
             
-            // Admin-Login
-            document.getElementById('loginBtn').addEventListener('click', async function() {
-                const email = document.getElementById('adminEmail').value || "admin@example.com";
-                const password = document.getElementById('adminPassword').value || "geheim";
-                
-                try {
-                    await auth.signInWithEmailAndPassword(email, password);
-                    document.getElementById('exportControls').style.display = 'block';
-                    document.getElementById('exportStatus').textContent = 'Erfolgreich eingeloggt';
-                } catch (error) {
-                    console.error('Login-Fehler:', error);
-                    document.getElementById('exportStatus').textContent = 'Login fehlgeschlagen: ' + error.message;
-                }
+            if (navAlarmButton) {
+                navAlarmButton.addEventListener('click', () => {
+                    showAlarmConfirmModal();
+                });
+            }
+            
+            if (circularHoldBtn) {
+                circularHoldBtn.addEventListener('mousedown', startHold);
+                circularHoldBtn.addEventListener('mouseup', stopHold);
+                circularHoldBtn.addEventListener('mouseleave', stopHold);
+                circularHoldBtn.addEventListener('touchstart', startHold);
+                circularHoldBtn.addEventListener('touchend', stopHold);
+                circularHoldBtn.addEventListener('touchcancel', stopHold);
+            }
+            
+            if (cancelAlarmConfirm) {
+                cancelAlarmConfirm.addEventListener('click', hideAlarmConfirmModal);
+            }
+            
+            if (closeAdminOverlay) {
+                closeAdminOverlay.addEventListener('click', hideAdminOverlay);
+            }
+            
+            if (closeAlarmModal) closeAlarmModal.addEventListener('click', hideAlarmModal);
+            if (closeAlarmModalBottom) closeAlarmModalBottom.addEventListener('click', hideAlarmModal);
+            
+            if (resetAlarmButton) resetAlarmButton.addEventListener('click', resetAlarm);
+            
+            if (alarmSearchInput) {
+                alarmSearchInput.addEventListener('input', (e) => {
+                    currentAlarmSearchTerm = e.target.value;
+                    renderAlarmList();
+                });
+            }
+            
+            if (statSignedinCard) statSignedinCard.addEventListener('click', showAllParticipants);
+            if (statPresentCard) statPresentCard.addEventListener('click', showPresentParticipants);
+            if (statMissingCard) statMissingCard.addEventListener('click', showMissingParticipants);
+            
+            document.querySelectorAll('.alarm-filter-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const filter = btn.dataset.filter;
+                    if (filter === 'all') showAllParticipants();
+                    else if (filter === 'present') showPresentParticipants();
+                    else if (filter === 'missing') showMissingParticipants();
+                });
             });
-            
-            // Excel-Export
-            document.getElementById('exportExcelBtn').addEventListener('click', async function() {
-                try {
-                    document.getElementById('exportStatus').textContent = 'Daten werden exportiert...';
-                    
-                    const snapshot = await db.collection('registrations').get();
-                    const data = snapshot.docs.map(doc => {
-                        const docData = doc.data();
-                        return {
-                            'Name': docData.lastName,
-                            'Vorname': docData.firstName,
-                            'Straße': docData.street,
-                            'Ort': docData.city || '',
-                            'Tel.': docData.phone,
-                            'Bezahlt': 'Ja',
-                            'Tagesgebühr': docData.dayFee ? 'Ja' : 'Nein',
-                            'Mittagessen': docData.lunch ? 'Ja' : 'Nein',
-                            'Darf alleine nach Hause': docData.aloneHome ? 'Ja' : 'Nein',
-                            'Unterschrift': docData.signature || 'N/A',
-                            'Datum': docData.date,
-                            'Eingetragen am': docData.timestamp?.toDate().toLocaleString('de-DE') || 'N/A'
-                        };
+
+            addUserButton?.addEventListener('click', () => {
+                const name = newUsernameInput?.value.trim();
+                const code = newUserCodeInput?.value.trim();
+                const status = newUserStatusSelect?.value;
+                if (!name || !code) { showAdminMessage(addUserMessage, "Name und Code erforderlich", true); return; }
+                if (users.some(u => u.code === code)) { showAdminMessage(addUserMessage, "Code existiert", true); return; }
+                users.push({ id: Date.now().toString(), username: name, code, status, active: true });
+                saveUsers();
+                showAdminMessage(addUserMessage, "Benutzer hinzugefügt", false);
+                newUsernameInput.value = '';
+                newUserCodeInput.value = '';
+            });
+
+            userListElement?.addEventListener('click', (e) => {
+                const target = e.target;
+                const id = target.dataset.id;
+                if (target.classList.contains('toggle-user-active-button')) {
+                    const idx = users.findIndex(u => u.id === id);
+                    if (idx > -1) {
+                        users[idx].active = !users[idx].active;
+                        saveUsers();
+                        showMessage(`Benutzer ${users[idx].username} wurde ${users[idx].active ? 'aktiviert' : 'deaktiviert'}`, false);
+                    }
+                } else if (target.classList.contains('change-user-status-button')) {
+                    const idx = users.findIndex(u => u.id === id);
+                    if (idx > -1) {
+                        const currentStatus = users[idx].status;
+                        if (currentStatus === 'admin') {
+                            users[idx].status = 'Betreuer';
+                        } else if (currentStatus === 'Betreuungsleitung') {
+                            users[idx].status = 'admin';
+                        } else {
+                            users[idx].status = 'Betreuungsleitung';
+                        }
+                        saveUsers();
+                        showMessage("Status geändert", false);
+                    }
+                } else if (target.classList.contains('delete-item-button') && target.dataset.type === 'user') {
+                    const name = target.dataset.username;
+                    showConfirmationModal('Benutzer löschen', `${name} wirklich löschen?`, () => {
+                        users = users.filter(u => u.id !== id);
+                        saveUsers();
+                        showMessage(`Benutzer ${name} gelöscht`, false);
                     });
-                    
-                    const wb = XLSX.utils.book_new();
-                    const ws = XLSX.utils.json_to_sheet(data);
-                    XLSX.utils.book_append_sheet(wb, ws, "Anmeldungen");
-                    
-                    const dateStr = new Date().toISOString().split('T')[0];
-                    XLSX.writeFile(wb, `Tutti_Kiesi_Anmeldungen_${dateStr}.xlsx`);
-                    
-                    document.getElementById('exportStatus').textContent = 'Export erfolgreich!';
-                } catch (error) {
-                    console.error('Export-Fehler:', error);
-                    document.getElementById('exportStatus').textContent = 'Fehler beim Export: ' + error.message;
                 }
             });
 
-            // Daten zurücksetzen
-// Daten zurücksetzen (NEUER CODE)
-document.getElementById('resetDataBtn').addEventListener('click', async function() {
-  if (!confirm('WARNUNG: Alle Anmeldungen werden unwiderruflich gelöscht. Fortfahren?')) return;
+            logoutButtonMain?.addEventListener('click', () => { closeAllSwipedItems(); handleLogout(); showMessage("Abgemeldet", false); });
+            logoutButtonAdmin?.addEventListener('click', () => { handleLogout(); showMessage("Abgemeldet", false); });
 
-  const statusElement = document.getElementById('exportStatus');
-  statusElement.textContent = "Lösche Daten...";
-  statusElement.style.color = "black";
+            navUserManagementButton?.addEventListener('click', () => showAdminSection('user-management-section'));
+            navParticipantManagementButton?.addEventListener('click', () => showAdminSection('participant-management-section'));
+            navParticipantOverviewButton?.addEventListener('click', () => showAdminSection('admin-participant-overview-section'));
+            navProgramSettingsButton?.addEventListener('click', () => showAdminSection('program-settings-section'));
 
-  try {
-    const snapshot = await db.collection('registrations').get();
-    for (const doc of snapshot.docs) {
-      await doc.ref.delete();
-    }
+            if (addSiblingBtn) {
+                addSiblingBtn.addEventListener('click', () => {
+                    if (child2Div?.classList.contains('hidden')) {
+                        child2Div.classList.remove('hidden');
+                    } else if (child3Div?.classList.contains('hidden')) {
+                        child3Div.classList.remove('hidden');
+                        addSiblingBtn.classList.add('hidden');
+                    }
+                });
+            }
 
-    statusElement.textContent = `✅ ${snapshot.size} Anmeldungen gelöscht (${new Date().toLocaleTimeString()})`;
-    statusElement.style.color = "green";
-  } catch (error) {
-    console.error("Löschfehler:", error);
-    statusElement.textContent = `❌ Fehler: ${error.message}`;
-    statusElement.style.color = "red";
-  }
-});
+            noDataCheckbox?.addEventListener('change', function() {
+                const disabled = this.checked;
+                if (newParticipantStreetInput) newParticipantStreetInput.disabled = disabled;
+                if (newParticipantCityInput) newParticipantCityInput.disabled = disabled;
+                if (newParticipantPhoneInput) newParticipantPhoneInput.disabled = disabled;
+                if (disabled) {
+                    if (newParticipantStreetInput) newParticipantStreetInput.value = '';
+                    if (newParticipantCityInput) newParticipantCityInput.value = '';
+                    if (newParticipantPhoneInput) newParticipantPhoneInput.value = '';
                 }
             });
-        });
-    </script>
+
+            sortSelect?.addEventListener('change', renderParticipantList);
+
+            cancelFamilyModal?.addEventListener('click', () => {
+                familyModal.classList.add('hidden');
+                pendingFamilyAction = null;
+                familyMembersListData = [];
+            });
+            
+            confirmFamilyAction?.addEventListener('click', executeFamilyAction);
+            
+            cancelPickupFamily?.addEventListener('click', () => {
+                pickupFamilyModal.classList.add('hidden');
+                pendingFamilyPickupMembers = null;
+                pickupFamilyMessage.classList.add('hidden');
+                familyModal.classList.remove('hidden');
+            });
+            
+            confirmPickupFamily?.addEventListener('click', confirmFamilyPickup);
+
+            const instructionsLink = document.getElementById('instructions-link');
+            const closeInstructionsButton = document.getElementById('close-instructions');
+            
+            if (instructionsLink && instructionsScreen) {
+                instructionsLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    mainContentScreen.classList.add('hidden');
+                    instructionsScreen.classList.remove('hidden');
+                });
+            }
+            
+            if (closeInstructionsButton && instructionsScreen && mainContentScreen) {
+                closeInstructionsButton.addEventListener('click', () => {
+                    instructionsScreen.classList.add('hidden');
+                    mainContentScreen.classList.remove('hidden');
+                });
+            }
+
+            document.addEventListener('click', (e) => {
+                const target = e.target;
+                
+                if (target.classList?.contains('participant-action-button')) {
+                    const pid = target.dataset.id;
+                    const action = target.dataset.action;
+                    
+                    if (action === 'toggle-present') {
+                        togglePresent(pid);
+                        return;
+                    }
+                    
+                    const idx = participants.findIndex(p => p.id === pid);
+                    if (idx === -1) return;
+                    const p = participants[idx];
+                    closeAllSwipedItems();
+                    
+                    const lastName = getLastName(p.name);
+                    const familyMembers = participants.filter(part => 
+                        part.id !== p.id && getLastName(part.name).toLowerCase() === lastName.toLowerCase()
+                    );
+                    
+                    if (familyMembers.length > 0) {
+                        const allFamily = [p, ...familyMembers];
+                        showFamilyModal(lastName, action, allFamily);
+                    } else {
+                        if (action === 'anmelden' && p.status === 'available') {
+                            p.status = 'signedIn';
+                            p.pickedUpBy = '';
+                            p.activityHistory.push({ type: 'Angemeldet', time: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'Unbekannt' });
+                            showActionFeedback(`${p.name} angemeldet`, true);
+                            saveParticipants();
+                            resetSearchAndFilter();
+                        } else if (action === 'abmelden' && p.status === 'signedIn') {
+                            if (!p.canGoHomeAlone) {
+                                currentParticipantBeingPickedUp = p;
+                                pickupParticipantName.textContent = p.name;
+                                pickupPersonSelect.value = "";
+                                customPickupPersonInput.value = "";
+                                customPickupPersonContainer.classList.add('hidden');
+                                pickupMessageBox.classList.add('hidden');
+
+                                if (p.allowedPickupPersons) {
+                                    allowedPickupNoticeText.textContent = `${p.allowedPickupPersons}`;
+                                    allowedPickupNotice.classList.remove('hidden');
+                                } else {
+                                    allowedPickupNotice.classList.add('hidden');
+                                }
+
+                                pickupModal.classList.remove('hidden');
+                            } else {
+                                p.status = 'available';
+                                p.pickedUpBy = 'Alleine nach Hause';
+                                p.activityHistory.push({ type: 'Abgemeldet', time: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'Unbekannt', pickup: 'Alleine nach Hause' });
+                                showActionFeedback(`${p.name} abgemeldet`, false);
+                                saveParticipants();
+                                resetSearchAndFilter();
+                            }
+                        }
+                    }
+                    resetInactivityTimer();
+                }
+                
+                else if (target.classList?.contains('info-icon')) {
+                    const pid = target.dataset.id;
+                    const participant = participants.find(p => p.id === pid);
+                    if (participant) {
+                        const parts = participant.name.split(' ');
+                        const first = parts.shift() || '';
+                        const last = parts.join(' ') || '';
+                        detailsFirstNameDisplay.textContent = first;
+                        detailsLastNameDisplay.textContent = last;
+                        detailsStreetDisplay.textContent = participant.noData ? '---' : (participant.street || 'N/A');
+                        detailsCityDisplay.textContent = participant.noData ? '---' : (participant.city || 'N/A');
+                        detailsPhoneDisplay.textContent = participant.noData ? '---' : (participant.phone || 'N/A');
+                        detailsRegtypeDisplay.textContent = participant.registrationType;
+                        detailsPaidDisplay.textContent = participant.paid ? 'Ja' : 'Nein';
+                        detailsCanGoHomeAloneDisplay.textContent = participant.canGoHomeAlone ? 'Ja' : 'Nein';
+                        detailsNoDataDisplay.textContent = participant.noData ? 'Ja' : 'Nein';
+                        
+                        if (noDataWarningDetail) {
+                            if (participant.noData) noDataWarningDetail.classList.remove('hidden');
+                            else noDataWarningDetail.classList.add('hidden');
+                        }
+                        
+                        if (participant.pickedUpBy) {
+                            detailsPickedUpBy.textContent = participant.pickedUpBy;
+                            detailsPickedUpByRow?.classList.remove('hidden');
+                        } else detailsPickedUpByRow?.classList.add('hidden');
+
+                        allowedPickupInput.value = participant.allowedPickupPersons || '';
+                        if (authSectionContainer) authSectionContainer.classList.add('hidden');
+
+                        if (participant.signatureImage) {
+                            signatureImagePreview.src = participant.signatureImage;
+                            signaturePreviewContainer.classList.remove('hidden');
+                        } else {
+                            signaturePreviewContainer.classList.add('hidden');
+                        }
+                        
+                        detailsFirstNameInput.value = first;
+                        detailsLastNameInput.value = last;
+                        detailsStreetInput.value = participant.street || '';
+                        detailsCityInput.value = participant.city || '';
+                        detailsPhoneInput.value = participant.phone || '';
+                        detailsRegtypeSelect.value = participant.registrationType;
+                        detailsPaidInput.checked = participant.paid;
+                        detailsCanGoHomeAloneInput.checked = participant.canGoHomeAlone;
+                        detailsNoDataInput.checked = participant.noData || false;
+                        
+                        const noDataActive = participant.noData;
+                        if (detailsStreetInput) detailsStreetInput.disabled = noDataActive;
+                        if (detailsCityInput) detailsCityInput.disabled = noDataActive;
+                        if (detailsPhoneInput) detailsPhoneInput.disabled = noDataActive;
+                        
+                        const isAdmin = currentLoggedInUserStatus === 'admin';
+                        setAdminEditMode(isAdmin);
+                        
+                        detailsActivityHistory.innerHTML = '';
+                        if (participant.activityHistory?.length) {
+                            participant.activityHistory.forEach(h => {
+                                const li = document.createElement('li');
+                                li.textContent = `${h.type} um ${h.time}${h.by ? ` durch ${h.by}` : ''}`;
+                                detailsActivityHistory.appendChild(li);
+                            });
+                        } else detailsActivityHistory.innerHTML = '<li class="text-[#8e8e93]">Keine Aktivitäten</li>';
+                        
+                        detailsCommentsList.innerHTML = '';
+                        if (participant.comments?.length) {
+                            participant.comments.forEach(c => {
+                                const p = document.createElement('p');
+                                p.className = 'text-sm text-[#6c6c70]';
+                                p.innerHTML = `<strong>${c.by}</strong> (${c.timestamp}): ${c.text}`;
+                                detailsCommentsList.appendChild(p);
+                            });
+                        } else detailsCommentsList.innerHTML = '<p class="text-[#8e8e93]">Keine Kommentare</p>';
+                        
+                        newCommentText.value = '';
+                        currentParticipantInDetailsModal = participant;
+                        participantDetailsModal.classList.remove('hidden');
+                    }
+                    resetInactivityTimer();
+                }
+            });
+
+            closeDetailsModalButton?.addEventListener('click', () => participantDetailsModal.classList.add('hidden'));
+            saveDetailsButton?.addEventListener('click', () => {
+                if (!currentParticipantInDetailsModal || currentLoggedInUserStatus !== 'admin') return;
+                const idx = participants.findIndex(p => p.id === currentParticipantInDetailsModal.id);
+                if (idx === -1) return;
+                currentParticipantInDetailsModal.name = `${detailsFirstNameInput.value.trim()} ${detailsLastNameInput.value.trim()}`.trim();
+                currentParticipantInDetailsModal.street = detailsStreetInput.value.trim();
+                currentParticipantInDetailsModal.city = detailsCityInput.value.trim();
+                currentParticipantInDetailsModal.phone = detailsPhoneInput.value.trim();
+                currentParticipantInDetailsModal.registrationType = detailsRegtypeSelect.value;
+                currentParticipantInDetailsModal.paid = detailsPaidInput.checked;
+                currentParticipantInDetailsModal.canGoHomeAlone = detailsCanGoHomeAloneInput.checked;
+                currentParticipantInDetailsModal.noData = detailsNoDataInput.checked;
+                participants[idx] = currentParticipantInDetailsModal;
+                saveParticipants();
+                showActionFeedback("Details gespeichert", true);
+                participantDetailsModal.classList.add('hidden');
+            });
+
+            addCommentButton?.addEventListener('click', () => {
+                const text = newCommentText?.value.trim();
+                if (!text || !currentParticipantInDetailsModal) return;
+                currentParticipantInDetailsModal.comments.push({
+                    text, timestamp: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'Unbekannt'
+                });
+                saveParticipants();
+                const p = document.createElement('p');
+                p.className = 'text-sm text-[#6c6c70]';
+                p.innerHTML = `<strong>${currentLoggedInUsername || 'Unbekannt'}</strong> (${new Date().toLocaleString('de-DE')}): ${text}`;
+                detailsCommentsList.appendChild(p);
+                newCommentText.value = '';
+                showActionFeedback("Kommentar hinzugefügt", true);
+            });
+
+            pickupPersonSelect?.addEventListener('change', (e) => {
+                if (e.target.value === 'Sonstige' || e.target.value === 'Berechtigte Person') {
+                    customPickupPersonContainer?.classList.remove('hidden');
+                    if (e.target.value === 'Berechtigte Person' && currentParticipantBeingPickedUp?.allowedPickupPersons) {
+                        customPickupPersonInput.value = currentParticipantBeingPickedUp.allowedPickupPersons;
+                    }
+                } else customPickupPersonContainer?.classList.add('hidden');
+            });
+
+            confirmPickupButton?.addEventListener('click', () => {
+                let person = pickupPersonSelect.value;
+                if (person === 'Sonstige' || person === 'Berechtigte Person') person = customPickupPersonInput?.value.trim();
+                if (!person) { showPickupMessageBox("Bitte Person angeben"); return; }
+                if (currentParticipantBeingPickedUp) {
+                    const idx = participants.findIndex(p => p.id === currentParticipantBeingPickedUp.id);
+                    if (idx > -1) {
+                        participants[idx].status = 'available';
+                        participants[idx].pickedUpBy = person;
+                        participants[idx].activityHistory.push({ type: 'Abgemeldet', time: new Date().toLocaleString('de-DE'), by: currentLoggedInUsername || 'Unbekannt', pickup: person });
+                        showActionFeedback(`${currentParticipantBeingPickedUp.name} von ${person} abgeholt`, false);
+                        saveParticipants();
+                        resetSearchAndFilter();
+                    }
+                }
+                pickupModal.classList.add('hidden');
+                currentParticipantBeingPickedUp = null;
+            });
+
+            cancelPickupButton?.addEventListener('click', () => {
+                pickupModal.classList.add('hidden');
+                currentParticipantBeingPickedUp = null;
+            });
+
+            cancelDeleteButton?.addEventListener('click', () => deleteModal.classList.add('hidden'));
+            confirmDeleteButton?.addEventListener('click', () => {
+                if (currentConfirmAction) currentConfirmAction();
+                deleteModal.classList.add('hidden');
+                currentConfirmAction = null;
+            });
+
+            importParticipantsButton?.addEventListener('click', () => {
+                const file = importParticipantsFileInput?.files[0];
+                if (!file) { showAdminMessage(importParticipantsMessage, "Datei wählen", true); return; }
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    const data = new Uint8Array(ev.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const rows = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                    if (!rows.length) return;
+                    const headers = rows[0].map(h => String(h).trim());
+                    let count = 0;
+                    for (let i = 1; i < rows.length; i++) {
+                        const vals = rows[i];
+                        if (vals.length >= 7) {
+                            const nameIdx = headers.indexOf('Name');
+                            const vornameIdx = headers.indexOf('Vorname');
+                            const strIdx = headers.indexOf('Straße');
+                            const ortIdx = headers.indexOf('Ort');
+                            const telIdx = headers.indexOf('Tel.');
+                            const alleinIdx = headers.indexOf('Darf alleine nach Hause');
+                            const bezahltIdx = headers.indexOf('Bezahlt');
+                            const regIdx = headers.indexOf('Anmeldeart');
+                            if (nameIdx !== -1 && vornameIdx !== -1) {
+                                const newP = {
+                                    id: Date.now() + '-' + i,
+                                    name: `${vals[vornameIdx]} ${vals[nameIdx]}`.trim(),
+                                    status: 'available',
+                                    registrationType: (regIdx !== -1 && vals[regIdx] && ['Tagesanmeldung','Wochenanmeldung'].includes(String(vals[regIdx]))) ? String(vals[regIdx]) : 'Tagesanmeldung',
+                                    street: strIdx !== -1 ? (vals[strIdx] || '') : '',
+                                    city: ortIdx !== -1 ? (vals[ortIdx] || '') : '',
+                                    phone: telIdx !== -1 ? String(vals[telIdx] || '') : '',
+                                    paid: bezahltIdx !== -1 ? (String(vals[bezahltIdx]).toLowerCase() === 'ja' || String(vals[bezahltIdx]).toLowerCase() === 'true') : false,
+                                    canGoHomeAlone: alleinIdx !== -1 ? (String(vals[alleinIdx]).toLowerCase() === 'ja' || String(vals[alleinIdx]).toLowerCase() === 'true') : false,
+                                    noData: false,
+                                    present: false,
+                                    pickedUpBy: '',
+                                    allowedPickupPersons: '',
+                                    signatureImage: '',
+                                    activityHistory: [],
+                                    comments: []
+                                };
+                                if (!participants.some(p => p.name.toLowerCase() === newP.name.toLowerCase())) {
+                                    participants.push(newP);
+                                    count++;
+                                }
+                            }
+                        }
+                    }
+                    if (count) { saveParticipants(); showAdminMessage(importParticipantsMessage, `${count} importiert`, false); }
+                    else showAdminMessage(importParticipantsMessage, "Keine neuen", true);
+                };
+                reader.readAsArrayBuffer(file);
+            });
+
+            addParticipantManualButton?.addEventListener('click', () => {
+                const firstName = document.getElementById('child1-first-name')?.value.trim();
+                const lastName = document.getElementById('child1-last-name')?.value.trim();
+                
+                if (!firstName || !lastName) {
+                    showAdminMessage(addParticipantManualMessage, "Vor- und Nachname erforderlich", true);
+                    return;
+                }
+                const noData = noDataCheckbox?.checked || false;
+                const regType = newParticipantRegtypeSelect?.value || 'Tagesanmeldung';
+                const street = newParticipantStreetInput?.value.trim() || '';
+                const city = newParticipantCityInput?.value.trim() || '';
+                const phone = newParticipantPhoneInput?.value.trim() || '';
+                const paid = newParticipantPaidCheckbox?.checked || false;
+                const canGoHomeAlone = newParticipantCanGoHomeAloneCheckbox?.checked || false;
+                
+                addChild(firstName, lastName, regType, noData, street, city, phone, paid, canGoHomeAlone, false);
+                saveParticipants();
+                showAdminMessage(addParticipantManualMessage, `${firstName} ${lastName} hinzugefügt`, false);
+                resetParticipantManagementForm();
+                renderParticipantList();
+            });
+
+            const addAndSignin = document.getElementById('add-and-signin-participant-button');
+            addAndSignin?.addEventListener('click', () => {
+                const firstName = document.getElementById('child1-first-name')?.value.trim();
+                const lastName = document.getElementById('child1-last-name')?.value.trim();
+                
+                if (!firstName || !lastName) {
+                    showAdminMessage(addParticipantManualMessage, "Vor- und Nachname erforderlich", true);
+                    return;
+                }
+                const noData = noDataCheckbox?.checked || false;
+                const regType = newParticipantRegtypeSelect?.value || 'Tagesanmeldung';
+                const street = newParticipantStreetInput?.value.trim() || '';
+                const city = newParticipantCityInput?.value.trim() || '';
+                const phone = newParticipantPhoneInput?.value.trim() || '';
+                const paid = newParticipantPaidCheckbox?.checked || false;
+                const canGoHomeAlone = newParticipantCanGoHomeAloneCheckbox?.checked || false;
+                
+                addChild(firstName, lastName, regType, noData, street, city, phone, paid, canGoHomeAlone, true);
+                saveParticipants();
+                showAdminMessage(addParticipantManualMessage, `${firstName} ${lastName} hinzugefügt und angemeldet`, false);
+                resetParticipantManagementForm();
+                renderParticipantList();
+            });
+
+            controlModeToggle?.addEventListener('change', () => {
+                controlModeActive = controlModeToggle.checked;
+                saveControlMode();
+                renderParticipantList();
+            });
+
+            createBackupButton?.addEventListener('click', () => createBackup(true));
+            loadBackupButton?.addEventListener('click', () => loadBackupInput?.click());
+            loadBackupInput?.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = async (ev) => {
+                    try {
+                        const data = JSON.parse(ev.target.result);
+                        participants = data;
+                        await saveParticipants();
+                        renderParticipantList();
+                        showMessage("Sicherung geladen", false);
+                    } catch(err) { showMessage("Fehler beim Laden", true); }
+                };
+                reader.readAsText(file);
+            });
+
+            removeAllParticipantsButton?.addEventListener('click', () => {
+                showConfirmationModal('Alle löschen', 'Wirklich alle Teilnehmer löschen?', async () => {
+                    participants = [];
+                    await saveParticipants();
+                    showMessage("Alle gelöscht", false);
+                });
+            });
+
+            removeDailyParticipantsButton?.addEventListener('click', () => {
+                showConfirmationModal('Tagesanmeldungen löschen', 'Alle Tagesanmeldungen entfernen?', async () => {
+                    participants = participants.filter(p => p.registrationType !== 'Tagesanmeldung');
+                    await saveParticipants();
+                    showMessage("Tagesanmeldungen gelöscht", false);
+                });
+            });
+
+            resetAllParticipantsButton?.addEventListener('click', () => {
+                showConfirmationModal('Zurücksetzen', 'Status und Aktivitäten zurücksetzen?', async () => {
+                    participants.forEach(p => {
+                        p.status = 'available';
+                        p.pickedUpBy = '';
+                        p.activityHistory = [];
+                        p.comments = [];
+                        p.present = false;
+                    });
+                    await saveParticipants();
+                    alarmActive = false;
+                    showMessage("Zurückgesetzt", false);
+                });
+            });
+
+            participantSearchInput?.addEventListener('input', renderParticipantList);
+            resetFiltersButton?.addEventListener('click', () => {
+                if (participantSearchInput) participantSearchInput.value = '';
+                if (sortSelect) sortSelect.value = 'firstNameAsc';
+                renderParticipantList();
+            });
+
+            ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(ev => document.addEventListener(ev, resetInactivityTimer, true));
+
+            // App Startup Sequence
+            async function startApp() {
+                initCircularProgress();
+                await initDB();
+                await loadUsers();
+                await loadParticipants();
+                await loadControlMode();
+                updateCodeDisplay();
+                resetInactivityTimer();
+            }
+
+            startApp();
+        </script>
+    </div>
 </body>
 </html>
