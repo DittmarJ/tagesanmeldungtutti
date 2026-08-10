@@ -1521,19 +1521,22 @@
                 });
             });
 
-            // TAGESENDE BERICHT ALS QUERFORMAT-TABELLE (AUTO-TABLE) MIT OPTIMIERTEN SPALTEN & KOMMENTAR-VERMERK
+            // TAGESENDE BERICHT ALS QUERFORMAT-TABELLE (AUTO-TABLE) MIT EINRICHTUNGS-KOPFZEILE
             function printDailyEndReportPDF() {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF('landscape'); // Querformat
                 const today = new Date().toLocaleDateString('de-DE');
 
-                doc.setFontSize(16);
+                doc.setFontSize(10);
                 doc.setFont("helvetica", "bold");
-                doc.text("Tagesende-Bericht / Anwesenheits- & Aktivitätsprotokoll", 14, 15);
+                doc.text("Spiel und Kulturhaus Tutti Kiesi – Werderstraße 46 – 79618 Rheinfelden", 14, 12);
+
+                doc.setFontSize(16);
+                doc.text("Tagesende-Bericht / Anwesenheits- & Aktivitätsprotokoll", 14, 20);
 
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
-                doc.text(`Datum: ${today}`, 14, 22);
+                doc.text(`Datum: ${today}`, 14, 26);
 
                 const tableRows = participants.map((p, index) => {
                     let statusText = p.status === 'signedIn' ? 'Angemeldet' : 'Abgemeldet / Frei';
@@ -1546,7 +1549,6 @@
                         activitiesText = 'Keine';
                     }
 
-                    // Bevollmächtigung und Kommentare zusammen in der Kommentarspalte zusammenfassen (leer lassen wenn nichts da ist)
                     let commentsParts = [];
                     if (p.allowedPickupPersons) {
                         commentsParts.push(`Bevollmächtigung: ${p.allowedPickupPersons}`);
@@ -1568,19 +1570,19 @@
                 });
 
                 doc.autoTable({
-                    startY: 28,
+                    startY: 30,
                     head: [['Nr.', 'Teilnehmer', 'Art', 'Status / Abholung', 'Aktivitäten', 'Kommentare / Vollmacht']],
                     body: tableRows,
                     theme: 'grid',
-                    styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' }, // Etwas kleiner für mehr Kompaktheit
+                    styles: { fontSize: 7, cellPadding: 2, overflow: 'linebreak' },
                     headStyles: { fillColor: [0, 122, 255] },
                     columnStyles: {
-                        0: { cellWidth: 10 },  // Nr.
-                        1: { cellWidth: 30 },  // Teilnehmer (schmaler)
-                        2: { cellWidth: 35 },  // Art (etwas breiter)
-                        3: { cellWidth: 45 },  // Status / Abholung
-                        4: { cellWidth: 75 },  // Aktivitäten (breiter)
-                        5: { cellWidth: 80 }   // Kommentare / Vollmacht (deutlich enger als vorher)
+                        0: { cellWidth: 10 },
+                        1: { cellWidth: 30 },
+                        2: { cellWidth: 35 },
+                        3: { cellWidth: 45 },
+                        4: { cellWidth: 75 },
+                        5: { cellWidth: 80 }
                     }
                 });
 
@@ -1588,7 +1590,7 @@
                 window.open(pdfBlobUrl, '_blank');
             }
 
-            // ALLE VOLLMÄCHTE ALS PDF DRUCKEN
+            // ALLE VOLLMÄCHTE ALS PDF DRUCKEN MIT EINRICHTUNGS-KOPFZEILE
             function printAllAuthorizationsPDF() {
                 const { jsPDF } = window.jspdf;
                 const doc = new jsPDF();
@@ -1604,76 +1606,79 @@
                 validParticipants.forEach((p, idx) => {
                     if (idx > 0) doc.addPage();
 
-                    doc.setFontSize(18);
+                    doc.setFontSize(9);
                     doc.setFont("helvetica", "bold");
-                    doc.text("VOLLMACHT ZUR ABHOLUNG EINES KINDES", 105, 20, { align: "center" });
+                    doc.text("Spiel und Kulturhaus Tutti Kiesi – Werderstraße 46 – 79618 Rheinfelden", 105, 12, { align: "center" });
+
+                    doc.setFontSize(18);
+                    doc.text("VOLLMACHT ZUR ABHOLUNG EINES KINDES", 105, 22, { align: "center" });
 
                     doc.setFontSize(10);
                     doc.setFont("helvetica", "normal");
-                    doc.text("(Tagesgültige Abholberechtigung)", 105, 27, { align: "center" });
+                    doc.text("(Tagesgültige Abholberechtigung)", 105, 29, { align: "center" });
 
                     doc.setLineWidth(0.5);
-                    doc.line(20, 32, 190, 32);
+                    doc.line(20, 34, 190, 34);
 
                     doc.setFontSize(12);
                     doc.setFont("helvetica", "bold");
-                    doc.text("1. Angaben zum Kind", 20, 42);
+                    doc.text("1. Angaben zum Kind", 20, 44);
                     
                     doc.setFontSize(10);
                     doc.setFont("helvetica", "normal");
-                    doc.text(`Vollständiger Name: ${p.name || '---'}`, 25, 50);
-                    doc.text(`Geburtsdatum: ${p.dob || 'Nicht hinterlegt'}`, 25, 57);
+                    doc.text(`Vollständiger Name: ${p.name || '---'}`, 25, 52);
+                    doc.text(`Geburtsdatum: ${p.dob || 'Nicht hinterlegt'}`, 25, 59);
 
                     doc.setFontSize(12);
                     doc.setFont("helvetica", "bold");
-                    doc.text("2. Erziehungsberechtigte(r) (Vollmachtgeber)", 20, 70);
+                    doc.text("2. Erziehungsberechtigte(r) (Vollmachtgeber)", 20, 72);
 
                     doc.setFontSize(10);
                     doc.setFont("helvetica", "normal");
-                    doc.text(`Vollständiger Name: ${p.parentName || '---'}`, 25, 78);
-                    doc.text(`Anschrift (vom Kind): ${p.street || '---'}, ${p.city || '---'}`, 25, 85);
-                    doc.text(`Telefonnummer (vom Kind): ${p.phone || '---'}`, 25, 92);
+                    doc.text(`Vollständiger Name: ${p.parentName || '---'}`, 25, 80);
+                    doc.text(`Anschrift (vom Kind): ${p.street || '---'}, ${p.city || '---'}`, 25, 87);
+                    doc.text(`Telefonnummer (vom Kind): ${p.phone || '---'}`, 25, 94);
 
                     doc.setFontSize(12);
                     doc.setFont("helvetica", "bold");
-                    doc.text("3. Bevollmächtigte Person (Abholperson)", 20, 105);
+                    doc.text("3. Bevollmächtigte Person (Abholperson)", 20, 107);
 
                     doc.setFontSize(10);
                     doc.setFont("helvetica", "normal");
-                    doc.text(`Vollständiger Name: ${p.allowedPickupPersonName || p.allowedPickupPersons || '---'}`, 25, 113);
-                    doc.text(`Beziehung zum Kind: ${p.allowedPickupRelation || 'Keine Angabe'}`, 25, 120);
+                    doc.text(`Vollständiger Name: ${p.allowedPickupPersonName || p.allowedPickupPersons || '---'}`, 25, 115);
+                    doc.text(`Beziehung zum Kind: ${p.allowedPickupRelation || 'Keine Angabe'}`, 25, 122);
 
                     doc.setFontSize(12);
                     doc.setFont("helvetica", "bold");
-                    doc.text("4. Gültigkeit & Rechtliche Hinweise", 20, 133);
+                    doc.text("4. Gültigkeit & Rechtliche Hinweise", 20, 135);
 
                     doc.setFontSize(9);
                     doc.setFont("helvetica", "normal");
-                    doc.text(`• Die Vollmacht gilt AUSSCHLIESSLICH für den heutigen Tag (${today}).`, 25, 141);
-                    doc.text(`• Die abholende Person muss MINDESTENS 14 JAHRE alt sein.`, 25, 147);
-                    doc.text(`• Die abholende Person muss sich auf Verlangen durch einen Lichtbildausweis ausweisen.`, 25, 153);
+                    doc.text(`• Die Vollmacht gilt AUSSCHLIESSLICH für den heutigen Tag (${today}).`, 25, 143);
+                    doc.text(`• Die abholende Person muss MINDESTENS 14 JAHRE alt sein.`, 25, 149);
+                    doc.text(`• Die abholende Person muss sich auf Verlangen durch einen Lichtbildausweis ausweisen.`, 25, 155);
 
                     doc.setLineWidth(0.3);
-                    doc.line(20, 165, 190, 165);
+                    doc.line(20, 167, 190, 167);
 
                     doc.setFontSize(11);
                     doc.setFont("helvetica", "bold");
-                    doc.text("Eigenhändige Unterschrift der/des Erziehungsberechtigten:", 20, 175);
+                    doc.text("Eigenhändige Unterschrift der/des Erziehungsberechtigten:", 20, 177);
 
                     if (p.signatureImage) {
-                        doc.addImage(p.signatureImage, 'PNG', 20, 180, 80, 35);
+                        doc.addImage(p.signatureImage, 'PNG', 20, 182, 80, 35);
                     }
 
                     doc.setFontSize(9);
                     doc.setFont("helvetica", "normal");
-                    doc.text(`Ausgestellt und digital erfasst am: ${today}`, 20, 222);
+                    doc.text(`Ausgestellt und digital erfasst am: ${today}`, 20, 224);
                 });
 
                 const pdfBlobUrl = doc.output('bloburl');
                 window.open(pdfBlobUrl, '_blank');
             }
 
-            // DRUCKEN / PDF GENERIERUNG FÜR EINZELPERSON
+            // DRUCKEN / PDF GENERIERUNG FÜR EINZELPERSON MIT EINRICHTUNGS-KOPFZEILE
             function printPDF() {
                 if (!currentParticipantInDetailsModal) return;
                 const p = currentParticipantInDetailsModal;
@@ -1683,69 +1688,72 @@
                 const today = new Date().toLocaleDateString('de-DE');
                 const parentNameFromInput = authParentNameInput.value.trim() || p.parentName || '---';
 
-                doc.setFontSize(18);
+                doc.setFontSize(9);
                 doc.setFont("helvetica", "bold");
-                doc.text("VOLLMACHT ZUR ABHOLUNG EINES KINDES", 105, 20, { align: "center" });
+                doc.text("Spiel und Kulturhaus Tutti Kiesi – Werderstraße 46 – 79618 Rheinfelden", 105, 12, { align: "center" });
+
+                doc.setFontSize(18);
+                doc.text("VOLLMACHT ZUR ABHOLUNG EINES KINDES", 105, 22, { align: "center" });
 
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
-                doc.text("(Tagesgültige Abholberechtigung)", 105, 27, { align: "center" });
+                doc.text("(Tagesgültige Abholberechtigung)", 105, 29, { align: "center" });
 
                 doc.setLineWidth(0.5);
-                doc.line(20, 32, 190, 32);
+                doc.line(20, 34, 190, 34);
 
                 doc.setFontSize(12);
                 doc.setFont("helvetica", "bold");
-                doc.text("1. Angaben zum Kind", 20, 42);
+                doc.text("1. Angaben zum Kind", 20, 44);
                 
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
-                doc.text(`Vollständiger Name: ${p.name || '---'}`, 25, 50);
-                doc.text(`Geburtsdatum: ${p.dob || 'Nicht hinterlegt'}`, 25, 57);
+                doc.text(`Vollständiger Name: ${p.name || '---'}`, 25, 52);
+                doc.text(`Geburtsdatum: ${p.dob || 'Nicht hinterlegt'}`, 25, 59);
 
                 doc.setFontSize(12);
                 doc.setFont("helvetica", "bold");
-                doc.text("2. Erziehungsberechtigte(r) (Vollmachtgeber)", 20, 70);
+                doc.text("2. Erziehungsberechtigte(r) (Vollmachtgeber)", 20, 72);
 
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
-                doc.text(`Vollständiger Name: ${parentNameFromInput}`, 25, 78);
-                doc.text(`Anschrift (vom Kind): ${p.street || '---'}, ${p.city || '---'}`, 25, 85);
-                doc.text(`Telefonnummer (vom Kind): ${p.phone || '---'}`, 25, 92);
+                doc.text(`Vollständiger Name: ${parentNameFromInput}`, 25, 80);
+                doc.text(`Anschrift (vom Kind): ${p.street || '---'}, ${p.city || '---'}`, 25, 87);
+                doc.text(`Telefonnummer (vom Kind): ${p.phone || '---'}`, 25, 94);
 
                 doc.setFontSize(12);
                 doc.setFont("helvetica", "bold");
-                doc.text("3. Bevollmächtigte Person (Abholperson)", 20, 105);
+                doc.text("3. Bevollmächtigte Person (Abholperson)", 20, 107);
 
                 doc.setFontSize(10);
                 doc.setFont("helvetica", "normal");
-                doc.text(`Vollständiger Name: ${allowedPickupPersonName.value.trim() || p.allowedPickupPersonName || p.allowedPickupPersons || '---'}`, 25, 113);
-                doc.text(`Beziehung zum Kind: ${allowedPickupRelation.value.trim() || p.allowedPickupRelation || 'Keine Angabe'}`, 25, 120);
+                doc.text(`Vollständiger Name: ${allowedPickupPersonName.value.trim() || p.allowedPickupPersonName || p.allowedPickupPersons || '---'}`, 25, 115);
+                doc.text(`Beziehung zum Kind: ${allowedPickupRelation.value.trim() || p.allowedPickupRelation || 'Keine Angabe'}`, 25, 122);
 
                 doc.setFontSize(12);
                 doc.setFont("helvetica", "bold");
-                doc.text("4. Gültigkeit & Rechtliche Hinweise", 20, 133);
+                doc.text("4. Gültigkeit & Rechtliche Hinweise", 20, 135);
 
                 doc.setFontSize(9);
                 doc.setFont("helvetica", "normal");
-                doc.text(`• Die Vollmacht gilt AUSSCHLIESSLICH für den heutigen Tag (${today}).`, 25, 141);
-                doc.text(`• Die abholende Person muss MINDESTENS 14 JAHRE alt sein.`, 25, 147);
-                doc.text(`• Die abholende Person muss sich auf Verlangen durch einen Lichtbildausweis ausweisen.`, 25, 153);
+                doc.text(`• Die Vollmacht gilt AUSSCHLIESSLICH für den heutigen Tag (${today}).`, 25, 143);
+                doc.text(`• Die abholende Person muss MINDESTENS 14 JAHRE alt sein.`, 25, 149);
+                doc.text(`• Die abholende Person muss sich auf Verlangen durch einen Lichtbildausweis ausweisen.`, 25, 155);
 
                 doc.setLineWidth(0.3);
-                doc.line(20, 165, 190, 165);
+                doc.line(20, 167, 190, 167);
 
                 doc.setFontSize(11);
                 doc.setFont("helvetica", "bold");
-                doc.text("Eigenhändige Unterschrift der/des Erziehungsberechtigten:", 20, 175);
+                doc.text("Eigenhändige Unterschrift der/des Erziehungsberechtigten:", 20, 177);
 
                 if (p.signatureImage) {
-                    doc.addImage(p.signatureImage, 'PNG', 20, 180, 80, 35);
+                    doc.addImage(p.signatureImage, 'PNG', 20, 182, 80, 35);
                 }
 
                 doc.setFontSize(9);
                 doc.setFont("helvetica", "normal");
-                doc.text(`Ausgestellt und digital erfasst am: ${today}`, 20, 222);
+                doc.text(`Ausgestellt und digital erfasst am: ${today}`, 20, 224);
 
                 const pdfBlobUrl = doc.output('bloburl');
                 window.open(pdfBlobUrl, '_blank');
